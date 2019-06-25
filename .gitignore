@@ -1,0 +1,6 @@
+.vs/
+*.sln
+Debug /
+My Advisor Results - */
+*.u2d
+*.vfproj

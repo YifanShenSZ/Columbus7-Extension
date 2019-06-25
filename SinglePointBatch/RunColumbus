@@ -1,0 +1,19 @@
+#!/bin/bash -l
+#SBATCH --job-name=Col_job
+#SBATCH --time=72:00:0
+#SBATCH --partition=shared
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=n
+#SBATCH --mail-type=end
+#SBATCH --mail-user=yshen57@jhu.edu
+
+# Source Columbus
+export COLUMBUS='/home-4/yshen57@jhu.edu/work/yshen/Software/Columbus7/Columbus'
+
+# Run serial
+#$COLUMBUS/runc -msmp 5000 -nproc 1 > runc.log
+
+# Run parallel
+#$COLUMBUS/runc -m 5000 -msmp 5000n -nproc n > runc.log
+
+rm -r WORK

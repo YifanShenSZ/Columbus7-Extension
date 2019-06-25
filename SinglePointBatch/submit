@@ -1,0 +1,19 @@
+#!bin/bash
+
+# This is to resubmit failed Columbus7 job or submit new job. Take an argument $1 = NDirectory
+
+for ((i=0; i<$1; i++)); do
+    cd $i
+    if [ -f 'runc.log' ]; then
+        success=`cat runc.log |grep timings`
+        if [ ! -n "$success" ]; then
+            if [ ! -d WORK ]; then
+                sbatch RunColumbus
+            fi
+        fi
+    else
+        cp ../RunColumbus ./
+        sbatch RunColumbus
+    fi
+    cd ..
+done

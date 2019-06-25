@@ -1,0 +1,45 @@
+#!bin/bash
+
+# This is to collect and reformat Columbus7 data. Take 2 arguments: $1 = NState, $2 = NDirectory
+
+# Collect
+dir=`pwd`
+for ((i=0; i<$2; i++)); do
+    cd $i
+# energy    
+    cd LISTINGS
+    while read -r line; do
+        data=$line
+    done < energy
+    if [ -f $dir/energy.temp ]; then
+        echo "$data" >> $dir/energy.temp
+    else
+        echo "$data" > $dir/energy.temp
+    fi
+    cd ..
+# gradient
+    cd GRADIENTS
+    for ((istate=1; istate<$[$1+1]; istate++)); do
+        while read -r line; do
+            if [ -f $dir/cartgrd.drt1.state$istate'.temp' ]; then
+                echo "$line" >> $dir/cartgrd.drt1.state$istate'.temp'
+            else
+                echo "$line" > $dir/cartgrd.drt1.state$istate'.temp'
+            fi
+        done < cartgrd.drt1.state$istate'.sp'
+        for ((jstate=$[$istate+1]; jstate<$[$1+1]; jstate++)); do
+            while read -r line; do
+                if [ -f $dir/cartgrd.nad.drt1.state$istate'.drt1.state'$jstate'.temp' ]; then
+                    echo "$line" >> $dir/cartgrd.nad.drt1.state$istate'.drt1.state'$jstate'.temp'
+                else
+                    echo "$line" > $dir/cartgrd.nad.drt1.state$istate'.drt1.state'$jstate'.temp'
+                fi
+            done < cartgrd.nad.drt1.state$istate'.drt1.state'$jstate'.sp'
+        done
+    done
+    cd $dir
+done
+
+# Reformat
+~/Script/Columbus7/Collect/Reformat.exe $1
+rm *.temp
