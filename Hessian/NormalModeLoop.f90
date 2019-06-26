@@ -12,6 +12,7 @@ program main
     character*2,allocatable,dimension(:)::ElementSymbol
     real*8,allocatable,dimension(:)::mass,r0,q0
 !Normal mode
+    integer::NImagMode
     real*8,allocatable,dimension(:)::freq
     real*8,allocatable,dimension(:,:)::mode
 !Work variable
@@ -56,6 +57,14 @@ program main
         end do
         freq=freq*cm_1InAu
     close(99)
+    if(freq(1)<0d0) then!Exist imaginary frequency mode, identify the number of such modes
+        do i=1,intdim
+            if(freq(i)>0d0) exit
+        end do
+        NImagMode=i-1
+    else
+        NImagMode=0
+    end if
     allocate(mode(intdim,intdim))
 	open(unit=99,file='NormalMode.txt',status='old')
         read(99,*)
@@ -69,21 +78,22 @@ program main
     close(99)
 !Generate loop geometries
     allocate(q(intdim)); allocate(r(cartdim))
-    open(unit=99,file='geom.test',status='replace')
-        do i=1,intdim
-            if(freq(i)<0d0) then!Imaginary frequency mode
-                dbletemp=dSqrt(1d-5*2d0/(freq(i)*freq(i)))
-                do k=-10,-1
-                    q=q0; q(i)=q(i)+dbletemp*dble(k); call WriteGeom()
-                end do
-                do k=1,10
-                    q=q0; q(i)=q(i)+dbletemp*dble(k); call WriteGeom()
-                end do
-            else!Real frequency mode
-                dbletemp=dSqrt(1d-5*2d0/(freq(i)*freq(i)))
-                q=q0; q(i)=q(i)+dbletemp; call WriteGeom()
-                q=q0; q(i)=q(i)-dbletemp; call WriteGeom()
-            end if
+    open(unit=99,file='geom.imag',status='replace')
+        do i=1,NImagMode
+            dbletemp=dSqrt(1d-5*2d0/(freq(i)*freq(i)))
+            do k=-10,-1
+                q=q0; q(i)=q(i)+dbletemp*dble(k); call WriteGeom()
+            end do
+            do k=1,10
+                q=q0; q(i)=q(i)+dbletemp*dble(k); call WriteGeom()
+            end do
+        end do
+    close(99)
+    open(unit=99,file='geom.real',status='replace')
+        do i=NImagMode+1,intdim
+            dbletemp=dSqrt(1d-5*2d0/(freq(i)*freq(i)))
+            q=q0; q(i)=q(i)+dbletemp; call WriteGeom()
+            q=q0; q(i)=q(i)-dbletemp; call WriteGeom()
         end do
     close(99)
     contains
