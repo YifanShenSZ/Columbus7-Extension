@@ -1,7 +1,7 @@
 !Check if the real mode loop has gradient component along imaginary mode
 !Input: intcfl, geom (the geometry calculated Hessian)
 !       VibrationalFrequency.txt, NormalMode.txt (normal mode information)
-!       geom.real, cartgrd.drt1.state1.all (real frequency mode loop information)
+!       geom.all, cartgrd.drt1.state1.all (real frequency mode loop information)
 program main
     use General; use Mathematics; use LinearAlgebra
     use NonlinearOptimization; use Chemistry
