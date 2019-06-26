@@ -3,8 +3,14 @@ MyLib = $(MyLibDir)/General.f90 $(MyLibDir)/Mathematics.f90 $(MyLibDir)/LinearAl
 $(MyLibDir)/mkl_rci.f90 $(MyLibDir)/NonlinearOptimization.f90 $(MyLibDir)/Chemistry.f90 \
 $(MyLibDir)/GeometryTransformation.f90
 
-GenGeom.exe: $(MyLib) GenGeom.f90
-	ifort -mkl $^ -o GenGeom.exe
+GenLoop: $(MyLib) GenLoop.f90
+	ifort -mkl $^ -o GenLoop.exe
+
+FiniteDifference: $(MyLib) FiniteDifference.f90
+	ifort -mkl $^ -o FiniteDifference.exe
+
+NormalModeLoop: $(MyLib) NormalModeLoop.f90
+	ifort -mkl $^ -o NormalModeLoop.exe
 
 clean:
 	rm *.mod
