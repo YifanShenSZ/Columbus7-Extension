@@ -1,9 +1,7 @@
-!Generate loop around the geometry calculated Hessian before along each normal mode
-!For imaginary frequency modes, will generate 10 points with approximately 1d-5 to 1d-3 Hatree
-!For real frequency modes, will only generate 1 point with approximately 1d-5 Hatree
-!Input : intcfl, geom (the geometry calculated Hessian)
-!        VibrationalFrequency.txt, NormalMode.txt (normal mode information)
-!Output: geom.imag, geom.real (loop geometries along imaginary and real frequency modes)
+!Check if the real mode loop has gradient component along imaginary mode
+!Input: intcfl, geom (the geometry calculated Hessian)
+!       VibrationalFrequency.txt, NormalMode.txt (normal mode information)
+!       geom.real, cartgrd.drt1.state1.all (real frequency mode loop information)
 program main
     use General; use Mathematics; use LinearAlgebra
     use NonlinearOptimization; use Chemistry
@@ -13,14 +11,16 @@ program main
     integer::NAtoms,intdim,cartdim
     integer,allocatable,dimension(:)::ElementNumber
     character*2,allocatable,dimension(:)::ElementSymbol
-    real*8,allocatable,dimension(:)::mass,r0,q0
+    real*8,allocatable,dimension(:)::mass,r0
 !Normal mode
     integer::NImagMode
-    real*8,allocatable,dimension(:)::freq,Normalq0
+    real*8,allocatable,dimension(:)::freq
     real*8,allocatable,dimension(:,:)::mode,L
+!Loop information
+    real*8,allocatable,dimension(:,:)::r,cartgrad,intgrad
 !Work variable
-    character*32::chartemp; real*8::dbletemp; integer::i,j,k
-    real*8,allocatable,dimension(:)::q,r
+    character*32::chartemp; real*8::dbletemp; integer::i,j
+    real*8,allocatable,dimension(:)::q
 !Initialize
     call BetterRandomSeed()
     open(unit=99,file='geom',status='old')!Read molecule detail
@@ -78,33 +78,31 @@ program main
 		end do
     close(99)
     allocate(L(intdim,intdim)); L=mode; call My_dgetri(L,intdim)
-!Generate loop geometries
-    allocate(q0(intdim)); q0=InternalCoordinateq(r0,intdim,cartdim)
-    allocate(Normalq0(intdim)); Normalq0=matmul(mode,q0)
-    allocate(q(intdim)); allocate(r(cartdim))
-    open(unit=99,file='geom.imag',status='replace')
-        do i=1,NImagMode
-            dbletemp=dSqrt(1d-5*2d0/(freq(i)*freq(i)))
-            do k=-10,-1
-                q=Normalq0; q(i)=q(i)+dbletemp*dble(k); q=matmul(L,q); call WriteGeom()
-            end do
-            do k=1,10
-                q=Normalq0; q(i)=q(i)+dbletemp*dble(k); q=matmul(L,q); call WriteGeom()
+!Only check real frequency mode loop
+    allocate(r(cartdim,2*(intdim-NImagMode)))
+    open(unit=99,file='geom.real',status='old')
+        do i=1,2*(intdim-NImagMode)
+            do j=1,NAtoms
+                read(99,'(A10,3F14.8,F14.8)')chartemp,r(3*j-2:3*j,i),dbletemp
             end do
         end do
     close(99)
-    open(unit=99,file='geom.real',status='replace')
-        do i=NImagMode+1,intdim
-            dbletemp=dSqrt(1d-5*2d0/(freq(i)*freq(i)))
-            q=Normalq0; q(i)=q(i)+dbletemp; q=matmul(L,q); call WriteGeom()
-            q=Normalq0; q(i)=q(i)-dbletemp; q=matmul(L,q); call WriteGeom()
+    allocate(cartgrad(cartdim,2*(intdim-NImagMode)))
+    open(unit=99,file='cartgrd.drt1.state1.all',status='old')
+        do i=1,2*(intdim-NImagMode)
+            do j=1,NAtoms
+                read(99,*)cartgrad(3*j-2:3*j,i)
+            end do
         end do
     close(99)
-    contains
-    subroutine WriteGeom()
-        r=CartesianCoordinater(q,cartdim,intdim,mass=mass,r0=r0)
-        do j=1,NAtoms
-            write(99,'(A2,I8,3F14.8,F14.8)')ElementSymbol(j),ElementNumber(j),r(3*j-2:3*j),mass(j)/AMUInAU
+    allocate(q(intdim)); allocate(intgrad(intdim,2*(intdim-NImagMode)))
+    do i=1,2*(intdim-NImagMode)
+        call Cartesian2Internal(r(:,i),cartdim,q,intdim,1,cartgrad=cartgrad(:,i),intgrad=intgrad(:,i))
+        intgrad(:,i)=matmul(L,intgrad(:,i))
+        do j=1,NImagMode
+            if(dAbs(intgrad(j,i))>1d-6) then
+                write(*,*)'Point',i,', displacing along real mode',NImagMode+(i+1)/2,', has gradient component along imaginary mode',j
+            end if
         end do
-    end subroutine WriteGeom
+    end do
 end program main

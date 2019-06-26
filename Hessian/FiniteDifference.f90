@@ -1,6 +1,6 @@
 !Compute ground state Hessian by finite difference of analytical gradient
 !Input : intcfl, geom (the geometry to calculate Hessian)
-!        geom.all, cartgrd.drt1.state1.all (finite difference information)
+!        geom.all, cartgrd.drt1.state1.all (loop information)
 !Output: Hessian, VibrationalFrequency.txt, NormalMode.txt
 program main
     use General; use Mathematics; use LinearAlgebra
@@ -12,15 +12,15 @@ program main
     integer,allocatable,dimension(:)::ElementNumber
     character*2,allocatable,dimension(:)::ElementSymbol
     real*8,allocatable,dimension(:)::mass,r0
+!Loop information
+    real*8,allocatable,dimension(:,:)::r,cartgrad,intgrad
 !Vibration analysis
     real*8,allocatable,dimension(:)::freq
     real*8,allocatable,dimension(:,:)::B,mode,L
 !Work variable
-    character*32::chartemp
-    real*8::dbletemp
-    integer::i,j
+    character*32::chartemp; real*8::dbletemp; integer::i,j
     real*8,allocatable,dimension(:)::q
-    real*8,allocatable,dimension(:,:)::r,cartgrad,intgrad,Hessian
+    real*8,allocatable,dimension(:,:)::Hessian
 !Initialize
     call BetterRandomSeed()
     open(unit=99,file='geom',status='old')!Read molecule detail
@@ -45,11 +45,11 @@ program main
             ElementSymbol(i)=trim(adjustl(ElementSymbol(i)))
         end do
         mass=mass*AMUInAU!Convert to atomic unit
-        !We will not transform internal to Cartesian, so no need to standardize geometry
+        call StandardizeGeometry(r0,mass,NAtoms,1)
     close(99)
     cartdim=3*NAtoms
     chartemp='Columbus7'; call DefineInternalCoordinate(chartemp,intdim)
-!Calculate Hessian
+!Read loop information
     allocate(r(cartdim,2*intdim))
     open(unit=99,file='geom.all',status='old')
         do i=1,2*intdim
@@ -66,11 +66,11 @@ program main
             end do
         end do
     close(99)
-    allocate(q(intdim))
-    allocate(intgrad(intdim,2*intdim))
+    allocate(q(intdim)); allocate(intgrad(intdim,2*intdim))
     do i=1,2*intdim
         call Cartesian2Internal(r(:,i),cartdim,q,intdim,1,cartgrad=cartgrad(:,i),intgrad=intgrad(:,i))
     end do
+!Calculate Hessian
     allocate(Hessian(intdim,intdim))
     do i=1,intdim
         Hessian(:,i)=intgrad(:,2*i-1)-intgrad(:,2*i)
