@@ -4,7 +4,7 @@ $(MyLibDir)/mkl_rci.f90 $(MyLibDir)/NonlinearOptimization.f90 $(MyLibDir)/Chemis
 $(MyLibDir)/GeometryTransformation.f90
 
 GenGeom.exe: $(MyLib) GenGeom.f90
-	ifort -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -ipo -O3 -no-prec-div -fp-model fast=2 $^ -o GenGeom.exe
+	ifort -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -ipo -O3 $^ -o GenGeom.exe
 
 clean:
 	rm *.mod
