@@ -12,5 +12,8 @@ FiniteDifference: $(MyLib) FiniteDifference.f90
 NormalModeLoop: $(MyLib) NormalModeLoop.f90
 	ifort -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -ipo -O3 $^ -o NormalModeLoop.exe
 
+HarmonicityCheck: $(MyLib) HarmonicityCheck.f90
+	ifort -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -ipo -O3 $^ -o HarmonicityCheck.exe
+
 clean:
 	rm *.mod
