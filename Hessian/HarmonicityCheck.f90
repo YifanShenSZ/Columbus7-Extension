@@ -80,7 +80,7 @@ program main
     allocate(L(intdim,intdim)); L=mode; call My_dgetri(L,intdim)
 !Only check real frequency mode loop
     allocate(r(cartdim,2*(intdim-NImagMode)))
-    open(unit=99,file='geom.real',status='old')
+    open(unit=99,file='geom.all',status='old')
         do i=1,2*(intdim-NImagMode)
             do j=1,NAtoms
                 read(99,'(A10,3F14.8,F14.8)')chartemp,r(3*j-2:3*j,i),dbletemp
