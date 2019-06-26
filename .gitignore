@@ -1,6 +1,6 @@
 .vs/
 *.sln
-Debug /
+Debug/
 My Advisor Results - */
 *.u2d
 *.vfproj
