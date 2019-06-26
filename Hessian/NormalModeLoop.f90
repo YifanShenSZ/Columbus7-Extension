@@ -13,8 +13,8 @@ program main
     real*8,allocatable,dimension(:)::mass,r0,q0
 !Normal mode
     integer::NImagMode
-    real*8,allocatable,dimension(:)::freq
-    real*8,allocatable,dimension(:,:)::mode
+    real*8,allocatable,dimension(:)::freq,Normalq0
+    real*8,allocatable,dimension(:,:)::mode,L
 !Work variable
     character*32::chartemp
     real*8::dbletemp
@@ -76,24 +76,26 @@ program main
 			read(99,'(F18.8)')mode(intdim,i)
 		end do
     close(99)
+    allocate(L(intdim,intdim)); L=mode; call My_dgetri(L,intdim)
+    allocate(Normalq0(intdim)); Normalq0=matmul(mode,q0)
 !Generate loop geometries
     allocate(q(intdim)); allocate(r(cartdim))
     open(unit=99,file='geom.imag',status='replace')
         do i=1,NImagMode
             dbletemp=dSqrt(1d-5*2d0/(freq(i)*freq(i)))
             do k=-10,-1
-                q=q0; q(i)=q(i)+dbletemp*dble(k); call WriteGeom()
+                q=Normalq0; q(i)=q(i)+dbletemp*dble(k); q=matmul(L,q); call WriteGeom()
             end do
             do k=1,10
-                q=q0; q(i)=q(i)+dbletemp*dble(k); call WriteGeom()
+                q=Normalq0; q(i)=q(i)+dbletemp*dble(k); q=matmul(L,q); call WriteGeom()
             end do
         end do
     close(99)
     open(unit=99,file='geom.real',status='replace')
         do i=NImagMode+1,intdim
             dbletemp=dSqrt(1d-5*2d0/(freq(i)*freq(i)))
-            q=q0; q(i)=q(i)+dbletemp; call WriteGeom()
-            q=q0; q(i)=q(i)-dbletemp; call WriteGeom()
+            q=Normalq0; q(i)=q(i)+dbletemp; q=matmul(L,q); call WriteGeom()
+            q=Normalq0; q(i)=q(i)-dbletemp; q=matmul(L,q); call WriteGeom()
         end do
     close(99)
     contains
