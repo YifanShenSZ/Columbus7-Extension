@@ -102,7 +102,7 @@ program main
     subroutine WriteGeom()
         r=CartesianCoordinater(q,cartdim,intdim,mass=mass,r0=r0)
         do j=1,NAtoms
-            write(99,'(A2,I8,3F14.8,F14.8)')ElementSymbol(j),ElementNumber(j),r(3*j-2:3*j),mass(j)
+            write(99,'(A2,I8,3F14.8,F14.8)')ElementSymbol(j),ElementNumber(j),r(3*j-2:3*j),mass(j)/AMUInAU
         end do
     end subroutine WriteGeom
 end program main
