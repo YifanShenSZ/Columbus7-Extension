@@ -24,22 +24,14 @@ program main
         write(*,*)'    3 * 14 space with 8 decimals for Cartesian coordinate in atomic unit'
         write(*,*)'    14 space with 8 decimals for atomic mass in atomic mass unit'
         write(*,*)'Some Columbus version may use different format, please correct it manually'
-        NAtoms=0
-        do
-            read(99,*,iostat=i); if(i/=0) exit
-            NAtoms=NAtoms+1
-        end do
-        rewind 99
-        allocate(ElementSymbol(NAtoms))
-        allocate(ElementNumber(NAtoms))
-        allocate(r0(3*NAtoms))
-        allocate(mass(NAtoms))
+        NAtoms=0; do; read(99,*,iostat=i); if(i/=0) exit; NAtoms=NAtoms+1; end do; rewind 99
+        allocate(ElementSymbol(NAtoms)); allocate(ElementNumber(NAtoms))
+        allocate(r0(3*NAtoms)); allocate(mass(NAtoms))
         do i=1,NAtoms
             read(99,'(A2,I8,3F14.8,F14.8)')ElementSymbol(i),ElementNumber(i),r0(3*i-2:3*i),mass(i)
             ElementSymbol(i)=trim(adjustl(ElementSymbol(i)))
         end do
-        !We only use mass to determine centre of mass, so no need to convert to atomic unit
-        call StandardizeGeometry(r0,mass,NAtoms,1)
+        mass=mass*AMUInAU; call StandardizeGeometry(r0,mass,NAtoms,1)
     close(99)
     cartdim=3*NAtoms
     chartemp='Columbus7'; call DefineInternalCoordinate(chartemp,intdim)
@@ -51,7 +43,7 @@ open(unit=99,file='geom.all',status='replace')!Modification starts here
         q(1)=q(1)+dble(i)*0.04d0
         r=CartesianCoordinater(q,cartdim,intdim,mass=mass,r0=r0)
         do j=1,NAtoms
-            write(99,'(A2,I8,3F14.8,F14.8)')ElementSymbol(j),ElementNumber(j)),r(3*j-2:3*j),mass(j)
+            write(99,'(A2,I8,3F14.8,F14.8)')ElementSymbol(j),ElementNumber(j)),r(3*j-2:3*j),mass(j)/AMUInAU
         end do
     end do
 close(99)
