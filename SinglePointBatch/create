@@ -1,7 +1,7 @@
 #!bin/bash
 
 # User input
-src=/home-4/yshen57@jhu.edu/data/yshen/Columbus/C5H9O/src # Columbus input template directory
+src=/home-4/yshen57@jhu.edu/data/yshen/C5H9O/Columbus/src # Columbus input template directory
 NAtoms=15
 
 # Do the jub
