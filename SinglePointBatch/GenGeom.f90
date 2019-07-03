@@ -43,7 +43,7 @@ open(unit=99,file='geom.all',status='replace')!Modification starts here
         q(1)=q(1)+dble(i)*0.04d0
         r=CartesianCoordinater(q,cartdim,intdim,mass=mass,r0=r0)
         do j=1,NAtoms
-            write(99,'(A2,I8,3F14.8,F14.8)')ElementSymbol(j),ElementNumber(j)),r(3*j-2:3*j),mass(j)/AMUInAU
+            write(99,'(A2,I8,3F14.8,F14.8)')ElementSymbol(j),ElementNumber(j),r(3*j-2:3*j),mass(j)/AMUInAU
         end do
     end do
 close(99)
