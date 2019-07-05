@@ -6,4 +6,6 @@ To run a batch of Columbus7 single point calculation:
 3. Modify the user input section in create (for path of input template directory, and NAtoms), bash create (This step creates directories naming from 0 to NGeoms - 1, which are single point calculation job directories)
 4. Modify RunColumbus to fit your queue, then bash submit $1, where $1 = NGeoms (This step submits the batch jobs. If some jobs fail, bash submit $1 again)
 
+Optionally, after not every job is finished, you may bash clean $1 $2, so that unnecessary files for collecting are deleted from directory $1 to $2 - 1
+
 Dependency: my Fortran-Library, as written in MyLib of makefile
