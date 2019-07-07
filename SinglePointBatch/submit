@@ -8,6 +8,7 @@ for ((i=0; i<$1; i++)); do
         success=`cat runc.log |grep timings`
         if [ ! -n "$success" ]; then
             if [ ! -d WORK ]; then
+                echo 'Failed job '$i
                 sbatch RunColumbus
             fi
         fi
