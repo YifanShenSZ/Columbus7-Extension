@@ -8,7 +8,7 @@
 #SBATCH --mail-user=yshen57@jhu.edu
 
 # Source Columbus
-export COLUMBUS='/home-4/yshen57@jhu.edu/work/yshen/Software/Columbus7/Columbus'
+export COLUMBUS='/data/dyarkon1/yshen/Software/Columbus-7.0/Columbus'
 
 # Run serial
 #$COLUMBUS/runc -msmp 5000 -nproc 1 > runc.log
