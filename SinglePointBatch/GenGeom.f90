@@ -12,8 +12,7 @@ program main
     character*2,allocatable,dimension(:)::ElementSymbol
     real*8,allocatable,dimension(:)::mass,r0
 !Work variable
-    character*32::chartemp
-    integer::i,j
+    character*32::chartemp; integer::i,j; real*8::dbletemp
     real*8,allocatable,dimension(:)::q0,q,r
 !Initialize
     call BetterRandomSeed()
@@ -22,8 +21,9 @@ program main
         allocate(ElementSymbol(NAtoms)); allocate(ElementNumber(NAtoms))
         allocate(r0(3*NAtoms)); allocate(mass(NAtoms))
         do i=1,NAtoms
-            read(99,*)ElementSymbol(i),ElementNumber(i),r0(3*i-2:3*i),mass(i)
+            read(99,*)ElementSymbol(i),dbletemp,r0(3*i-2:3*i),mass(i)
             ElementSymbol(i)=trim(adjustl(ElementSymbol(i)))
+            ElementNumber(i)=int(dbletemp)
         end do
         mass=mass*AMUInAU; call StandardizeGeometry(r0,mass,NAtoms,1)
     close(99)
