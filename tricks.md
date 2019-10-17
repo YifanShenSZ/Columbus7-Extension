@@ -32,3 +32,7 @@
 
 ## Computation cost
 1. CI expansion should not exceed 200,000,000
+
+## Common bug
+* CI
+1. 'maxbl' too small: increase maxbl in cisrtin, usually up to 200000
