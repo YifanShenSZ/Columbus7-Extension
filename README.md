@@ -7,4 +7,6 @@ Featured utilities:
 2. Collect the batch (Collect)
 3. Calculate Hessian and vibration (Hessian), and provide scan along each normal mode
 
-See tricks.md for tricks in using Columbus7
+Also there are some experiences in using Columbus7 provided:
+1. General issues in General.md
+2. MRCI issues in MRCI.md
