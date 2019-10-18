@@ -22,7 +22,7 @@
 * Tighten MRCI gradient tolerance in cigrdin:
 1. orbital resolution < wndtol=1e-9,wnatol=1e-9,wnvtol=1e-9
 2. final effective densitymatrix < ftol=1e-11
-3. if using LAPACK solver (no symmetry): solvelpck=1,mdir=0,cdir=0; else Columbus solver (with symmetry): rtol=1e-10,dtol=1e-10,nmiter=200,nvrsmx=200
+3. if using LAPACK solver (no symmetry): solvelpck=1,mdir=0,cdir=0; else Columbus solver (with symmetry): nmiter=200,nvrsmx=200,rtol=1e-10,dtol=1e-10
 
 ## Special skill
 * FROOT: NROOT computes the lowest NROOT MRCI roots; FROOT follows the FROOT-th MCSCF root and optimizes it with MRCI (keeping tracking by overlap), then output it along with lower MRCI states. FROOT is better at giving the state you want, but may fail when MRCI has different state ordering from MCSCF
