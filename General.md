@@ -6,7 +6,7 @@
 1. Enter a desired directory, tar -xzvf the installation package
 2. export COLUMBUS=(current directory)/Columbus
 3. Copy all GA libraries (in GA/lib) to $Columbus
-4. vi install.config. If the last lines = cpan || standar || grad || parallel, then delete these lines. Repeat this operation each time before ./install.automatic
+4. vi install.config. If the last lines = cpan || standard || grad || parallel, then delete these lines. Repeat this operation each time before ./install.automatic
 5. ./install.automatic cpan
 6. ./install.automatic standard
 7. ./install.automatic grad
