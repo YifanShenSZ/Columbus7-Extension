@@ -1,10 +1,5 @@
-MyLibDir = ~/Library/Fortran-Library
-MyLib = $(MyLibDir)/General.f90 $(MyLibDir)/Mathematics.f90 $(MyLibDir)/LinearAlgebra.f90 \
-$(MyLibDir)/mkl_rci.f90 $(MyLibDir)/NonlinearOptimization.f90 $(MyLibDir)/Chemistry.f90 \
-$(MyLibDir)/GeometryTransformation.f90
+libdir = /home-4/yshen57@jhu.edu/lib
+incdir = /home-4/yshen57@jhu.edu/include
 
-GenGeom.exe: $(MyLib) GenGeom.f90
-	ifort -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -ipo -O3 $^ -o GenGeom.exe
-
-clean:
-	rm *.mod
+GenGeom.exe: GenGeom.f90
+	ifort -I$(incdir) -L$(libdir) -lFL -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -O3 $^ -o GenGeom.exe
