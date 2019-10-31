@@ -1,19 +1,7 @@
-MyLibDir = ~/Library/Fortran-Library
-MyLib = $(MyLibDir)/General.f90 $(MyLibDir)/Mathematics.f90 $(MyLibDir)/LinearAlgebra.f90 \
-$(MyLibDir)/mkl_rci.f90 $(MyLibDir)/NonlinearOptimization.f90 $(MyLibDir)/Chemistry.f90 \
-$(MyLibDir)/GeometryTransformation.f90
+libdir = /home-4/yshen57@jhu.edu/lib
+incdir = /home-4/yshen57@jhu.edu/include
 
-GenLoop: $(MyLib) GenLoop.f90
-	ifort -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -ipo -O3 $^ -o GenLoop.exe
-
-FiniteDifference: $(MyLib) FiniteDifference.f90
-	ifort -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -ipo -O3 $^ -o FiniteDifference.exe
-
-NormalModeLoop: $(MyLib) NormalModeLoop.f90
-	ifort -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -ipo -O3 $^ -o NormalModeLoop.exe
-
-HarmonicityCheck: $(MyLib) HarmonicityCheck.f90
-	ifort -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -ipo -O3 $^ -o HarmonicityCheck.exe
-
-clean:
-	rm *.mod
+GenLoop.exe FiniteDifference.exe NormalModeLoop.exe: $(MyLib) GenLoop.f90 FiniteDifference.f90 NormalModeLoop.f90
+	ifort -I$(incdir) -L$(libdir) -lFL -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -O3 GenLoop.f90 -o GenLoop.exe
+	ifort -I$(incdir) -L$(libdir) -lFL -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -O3 FiniteDifference.f90 -o FiniteDifference.exe
+	ifort -I$(incdir) -L$(libdir) -lFL -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -O3 NormalModeLoop.f90 -o NormalModeLoop.exe

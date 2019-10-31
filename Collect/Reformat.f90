@@ -12,23 +12,14 @@ program main
     real*8,allocatable,dimension(:,:,:,:,:)::nac
     call getarg(1,cmd); read(cmd,*)NState
     open(unit=99,file='energy.temp',status='old')
-        NPoint=0
-        do
-            read(99,*,iostat=i); if(i/=0) exit
-            NPoint=NPoint+1
-        end do
-        rewind 99
+        NPoint=0; do; read(99,*,iostat=i); if(i/=0) exit; NPoint=NPoint+1; end do; rewind 99
         allocate(energy(NState,NPoint))
         do ip=1,NPoint
             read(99,*)energy(:,ip),dbtemp
         end do
     close(99)
     open(unit=99,file='cartgrd.drt1.state1.temp',status='old')
-        NAtoms=0
-        do
-            read(99,*,iostat=i); if(i/=0) exit
-            NAtoms=NAtoms+1
-        end do
+        NAtoms=0; do; read(99,*,iostat=i); if(i/=0) exit; NAtoms=NAtoms+1; end do
         NAtoms=NAtoms/NPoint
     close(99)
     allocate(grad(3,NAtoms,NState,NPoint))

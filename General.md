@@ -2,25 +2,31 @@
 
 ## Installation
 
-* Step
+* Steps
+0. Install a Global Arrays
 1. Enter a desired directory, tar -xzvf the installation package
 2. export COLUMBUS=(current directory)/Columbus
-3. Copy all GA libraries (in GA/lib) to $Columbus
-4. vi install.config. If the last lines = cpan || standard || grad || parallel, then delete these lines. Repeat this operation each time before ./install.automatic
-5. ./install.automatic cpan
-6. ./install.automatic standard
-7. ./install.automatic grad
-8. ./install.automatic parallel
+3. cp PathToGlobalArrays/lib/*.a $Columbus
+4. vi install.config. If the last line(s) = cpan || standard || grad || parallel, then delete these line(s). Repeat this operation each time before ./install.automatic
+5. ./install.automatic cpan standard grad
+6. ./install.automatic parallel
 
-* Suggestion
-1. Better use openmpi rather than intel mpi
-2. See Modification section in case of something wrong with standard installation step
+* Solutions to some issues
+0. Global Arrays does not support mpi 3.0 standard, e.g. openmpi 4 fails but 3 works
+1. Installation may fail with intel mpi. Openmpi works
+2. Replace certain files with their counterparts in Modification
 
 ## Modification
-* The install.automatic packed in the installation package may have trouble on late shell. Here is my modified version debugged on ubuntu 16 and 18
-* The install.config packed in the installation package is for gnu compiler. Here is a version for intel compiler
-* For minimum energy crossing point search, replace the polyhess.x in $COLUMBUS
-* For special Rydberg basis, add Rydberg.bas to $COLUMBUS/source/iargos/basis. Columbus provides 2 common Rydberg basis in X.bas
+The files in Modification directory is meant to replace their counterparts provided by Columbus in certain cases
+
+* Installation
+1. ./install.automatic may have trouble with late shell. Here is my modified version debugged on ubuntu 16 and 18
+2. ./install.config is for intel mpi. Here is my version for open mpi
+3. $COLUMBUS/machine.cfg/linux64.ifc.byterecl is a file to pass compiler flags. Replace it when some flag related problem occur, e.g. 'dynamic library has to be created with -fpic'
+
+* Utilities
+1. For minimum energy crossing point search, replace $COLUMBUS/polyhess.x
+2. For special Rydberg basis, add Rydberg.bas to $COLUMBUS/source/iargos/basis. Columbus provides 2 common Rydberg basis in X.bas
 
 ## Weird stuff
 

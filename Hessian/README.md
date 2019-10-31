@@ -7,6 +7,6 @@ To calculate Hessian:
 
 After Hessian and normal modes are obtained, you may scan each normal mode:
 1. Run NormalModeLoop.exe (create geom.imag and geom.real), then go to step 3 in SinglePointBatch (please rename to geom.all when bash create)
-2. Go to Collect. Optionally, run HarmonicityCheck.exe to make sure the scan is valid
+2. Go to Collect
 
 Dependency: my Fortran-Library, as written in MyLib of makefile

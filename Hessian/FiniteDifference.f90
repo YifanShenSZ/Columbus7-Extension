@@ -16,13 +16,12 @@ program main
     real*8,allocatable,dimension(:,:)::r,cartgrad,intgrad
 !Vibration analysis
     real*8,allocatable,dimension(:)::freq
-    real*8,allocatable,dimension(:,:)::B,mode,L
+    real*8,allocatable,dimension(:,:)::B,L,Linv,cartmode
 !Work variable
     character*32::chartemp; integer::i,j; real*8::dbletemp
     real*8,allocatable,dimension(:)::q
     real*8,allocatable,dimension(:,:)::Hessian
 !Initialize
-    call BetterRandomSeed()
     open(unit=99,file='geom',status='old')!Read molecule detail
         NAtoms=0; do; read(99,*,iostat=i); if(i/=0) exit; NAtoms=NAtoms+1; end do; rewind 99
         allocate(ElementSymbol(NAtoms)); allocate(ElementNumber(NAtoms))
@@ -71,28 +70,21 @@ program main
         write(99,*)Hessian
     close(99)
 !Vibration analysis
+    !Construct Wilson B matrix
     allocate(B(intdim,cartdim))
     call WilsonBMatrixAndInternalCoordinateq(B,q,r0,intdim,cartdim)
-    allocate(freq(intdim)); allocate(mode(intdim,intdim)); allocate(L(intdim,intdim))
-    call WilsonGFMethod(freq,mode,L,Hessian,intdim,B,mass,NAtoms)
+    !Run Wilson GF method for vibrational frequency and internal normal mode, output vibrational frequency
+    allocate(freq(intdim)); allocate(L(intdim,intdim)); allocate(Linv(intdim,intdim))
+    call WilsonGFMethod(freq,L,Linv,Hessian,intdim,B,mass,NAtoms)
     open(unit=99,file='VibrationalFrequency.txt',status='replace')
         write(99,'(A4,A1,A15)')'Mode',char(9),'Frequency/cm^-1'
-        do i=1,intdim
-            write(99,'(I4,A1,F14.8)')i,char(9),freq(i)/cm_1InAu
-        end do
+        do i=1,intdim; write(99,'(I4,A1,F14.8)')i,char(9),freq(i)/cm_1InAu; end do
     close(99)
-	open(unit=99,file='NormalMode.txt',status='replace')
-	    write(99,'(A6,A1)',advance='no')'q\Mode',char(9)
-		do i=1,intdim-1
-			write(99,'(I6,A1)',advance='no')i,char(9)
-		end do
-		write(99,'(I6)')intdim
-		do i=1,intdim
-			write(99,'(I8,A1)',advance='no')i,char(9)
-			do j=1,intdim-1
-				write(99,'(F18.8,A1)',advance='no')mode(j,i),char(9)
-			end do
-			write(99,'(F18.8)')mode(intdim,i)
-		end do
-    close(99)
+    open(unit=99,file=)
+    !Convert internal normal mode to Cartesian, output visualization
+    allocate(cartmode(cartdim,intdim))
+    call InternalMode2CartesianMode(freq,L,InternalDimension,B,cartmode,CartesianDimension)
+    chartemp='geom.log'
+    call Avogadro_Vibration(NAtoms,ElementSymbol,r0/AInAU,intdim,freq/cm_1InAu,cartmode,FileName=chartemp)
+    write(*,'(1x,A77)')'To visualize the molecular structure and vibration, open geom.log in Avogadro'
 end program main
