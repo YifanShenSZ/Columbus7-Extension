@@ -1,0 +1,978 @@
+#!/bin/sh
+#set -v
+#
+# search for available program
+# $1 = program name
+# $2 = GNU  - check for GNU version
+# $3 = variable name to return program path
+# return codes: 0 ok
+#               1 program not in path
+#               2 program in path but no GNU version
+#
+
+ searchprog() {
+
+#      echo " searching for program $1 $3 "
+       ANSWER=`which $1 | wc -w `
+       if  [ $ANSWER != 1 ] ; then
+          echo "cannot find $1 "
+          return 1
+       else
+        if [ ! -z "$3" ] ; then  ANSWER=`which $1`; eval "$3=$ANSWER"; echo "--> $3"; fi
+        if  [ $2 = 'GNU' ] ; then
+#         ANSWER=`$GREP -V | 2>&1 $GREP GNU | 2>&1 wc -l`
+          ANSWER=`$GREP -V |  $GREP GNU |  wc -l`
+          if [ $ANSWER = 0 ]; then
+             echo "you do not seem to have GNU version of $1 "
+             echo "this might cause problems ... "
+             return 2
+          fi
+        fi
+       fi
+       return 0
+   }
+
+#
+# extract keyword from file
+# $1 keyword  $2 filename
+# return value  1 keyword not found 0 keyword found
+# if keyword is found the variable keyword is set to its value
+# file structure: one keyword per line, starting at position 1
+#                 separated from its value by one or more blanks
+#
+
+  getkeyword () {
+     INP=`grep $1 $2 | head -1 | sed -e 's/ *$//'`
+     grep "^$1 " $2 > /dev/null
+     if [ $? -eq 0 ] ; then
+       VALUE=${INP#"$1"}
+       eval "$1"=\'"${VALUE# *}"\'
+#      echo "found keyword $1 in $2 with value $VALUE "
+       return 0
+     else
+#      echo "did not find keyword $1 "
+       return 1
+     fi
+    }
+
+  getkeywtmp () {
+     INP=`grep $1 $2 | head -1 | sed -e 's/ *$//'`
+     grep "^$1 " $2 > /dev/null
+     if [ $? -eq 0 ] ; then
+       VALUE=${INP#"$1"}
+       eval TMP=\'"${VALUE# *}"\'
+#      echo "found keyword $1 in $2 with value $TMP "
+       return 0
+     else
+#      echo " keyword $1 in $2 not found "
+       return 1
+     fi
+    }
+
+
+   chkenv () {
+     eval "TMPP=\$$1"
+     if [ ! -z "$TMPP" ] ; then
+      echo "$1 environment variable already set "
+      echo "remove this setting from shell initialization files "
+      echo "or make sure that it agrees with the value in install.config"
+#    else
+#     echo "$1 environment variable not yet set "
+     fi
+     return 0
+   }
+
+   spatt () {
+#
+#   search pattern $2 in string $1
+#   return 1 if nothing matched and 0 if a match occured
+#
+    echo "searching for $2 in $1 "
+     echo $1 | $GREP $2  > /dev/null
+     if [ $? -eq 0 ] ; then return 0
+     else
+     return 1
+     fi
+    }
+
+
+
+    addtoconfig () {
+#
+#   add value of environment variable $1 to $3
+#
+
+    echo "$1 $2" >> $3
+#   echo "addtoconfig $1: $2 : $3 "
+
+#
+#  bash:   a=$b  b="one"
+#          eval echo $a   => one
+#          echo $a        => $b
+#
+#          a=b   b="one"
+#          xx=\""\$$a"\"  => "$b"
+#          eval echo $xx  => one
+#
+
+    }
+
+
+
+
+    printstatus () {
+
+    echo "============================"
+    echo "settings : CPPL             = $CPPL "
+    echo "         : PERL             = $PERL "
+    echo "         : RANLIB           = $RANLIB "
+    echo "         : GMAKE            = $GMAKE  "
+    echo "         : GREP             = $GREP   "
+    echo "         : TAR              = $TAR    "
+    echo "         : GUNZIP           = $GUNZIP "
+    echo "         : BLASLIBRARY      = $BLASLIBRARY"  ;
+    echo "         : LAPACKLIBRARY    = $LAPACKLIBRARY";
+    echo "         : COLUMBUS         = $COLUMBUS "
+    echo "         : DALTON           = $DALTON "
+    echo "         : DALTON2          = $DALTON2"
+#   echo "         : TURBOCOL         = $TURBOCOL  "
+    echo "         : GACOMMUNICATION  = $GACOMMUNICATION"
+    echo "         : MPI_MAINDIR      = $MPI_MAINDIR  ";
+    echo "         : MPI_LIBS         = $MPI_LIBS     ";
+    echo "         : MPI_STARTUP      = $MPI_STARTUP  ";
+#   echo "         : SORTHOSTLIST     = $SORTHOSTLIST ";
+    echo "         : PSCRIPT          = $PSCRIPT      ";
+    echo "         : MPI_FC           = $MPI_FC  ";
+    echo "         : MPI_LD           = $MPI_LD  ";
+    echo "         : MPI_CC           = $MPI_CC  ";
+    echo "         : MOLCAS           = $MOLCAS  ";
+    echo "         : VMOLCAS          = $VMOLCAS  ";
+    echo "         : PMOLCAS          = $PMOLCAS  ";
+    echo "         : MCFLAGS          = $MCFLAGS  ";
+    echo "         : INSTALLOPTION    = $INSTALLOPTION";
+    echo "         : COLUMBUSVERSION  = $COLUMBUSVERSION";
+    echo "         : GAVERSION        = $GAVERSION";
+    echo "============================"
+    echo "---------- configuration file  Columbus/machine.cfg/$MACHINE ------------------"
+    cat Columbus/machine.cfg/$MACHINE | sed -e '/^ *$/d' | sed -e '/^$/d' | sed -e '/^#/d'
+    echo "------------------------------------------------------------------------"
+
+    if [ "$STATIC" = "-forcestatic" ]; then
+       echo "******************************************************************************"
+       echo "***  forcing statically linked binaries                                    ***"
+       echo "***  STATIC must be defined in the machine.cfg/<machineid> definition file ***"
+       echo "******************************************************************************"
+    fi
+
+
+    }
+
+
+   cleanconfig () {
+
+    mv -f install.config install.config.old
+    sort install.config.old | uniq -u  > install.config.scr
+
+
+    keywords="GREP GMAKE TAR RANLIB CPPL PERL \
+              BLASLIBRARY LAPACKLIBRARY MACHINEID GUNZIP GACOMMUNICATION \
+              INSTALLOPTION MPI_MAINDIR MPI_CC MPI_LD MPI_FC PSCRIPT GAVERSION  \
+               MCFLAGS  VMOLCAS PMOLCAS MOLCAS  MPI_LIBS MPI_STARTUP DALTON2 "
+
+    ERROR=0
+    for item in $keywords ; do
+     CNT=`grep "^$item " install.config.scr | wc -l `
+     CNTT=`grep  "^$item" install.config.scr`
+     CNTTT=`grep  "^$item" install.config.scr | wc -l `
+     if [ $CNT -gt 1 ]; then
+       echo "the keyword $item appears more than once in install.config "
+       ERROR=1
+     elif [ $CNT -eq 1 ] || [ $CNTTT -eq 1 ]; then
+#      echo "found keyword $item in install.config"
+       echo "$CNTT" >> install.config
+     fi
+    done
+    rm -f install.config.scr
+     if [ $ERROR -eq 1 ] ; then exit; fi
+    return
+    }
+
+#################
+
+  checkpackage () {
+#
+#  $1 package name
+#  $2 environmentvariable to be set
+#  also set $2TESTS to 1
+#
+
+   validpackage="STANDARD CPAN GRAD DIRECT CC PARALLEL RUNTESTS"
+    OK=0
+    for item in $validpackage
+    do
+    if [ $item = $1 ]; then
+     OK=1
+     break
+    fi
+    done
+    if [ $OK -eq 0 ] ; then
+     echo "invalid package name "
+     echo "valid package ids are" `echo $validpackage | tr '[A-Z]' '[a-z]' `
+     exit
+    fi
+
+   getkeywtmp `echo $1 | tr '[A-Z]' '[a-z]' `  install.config
+#  echo " checkpackage $1 $2 "
+#  echo `echo $1 | tr '[A-Z]' '[a-z]' `  install.config
+   if [ $? = 0 ]; then
+      echo ">>>> $1 package already installed during a previous run <<<<"
+      echo " ... skipping installation of $1 package"
+      eval "$2=0"
+      eval "${2}TESTS=1"
+      return 0
+   fi
+   eval "$2=1"
+   eval "${2}TESTS=1"
+   return 1
+   }
+
+   usage () {
+     validmachines=`ls Columbus/machine.cfg`
+      echo "usage : "
+      echo "U:install.automatic [-static] [-configonly] [-ponly] -p machine_id [standard cpan grad cc parallel runtests] "
+      echo "valid machine_ids are $validmachines"
+      exit
+    }
+
+
+##############
+
+    comlineproc () {
+
+     NOX=1
+     NOPORT=1
+     PORTONLY=0
+     SKIP=0
+     CONFIG=0
+     STATIC=""
+     if [ $# -eq 0 ] ; then
+      echo "X1"
+       usage
+     fi
+
+     while [ $# -gt 0 ] ; do
+#     echo "argument: $1"
+      case $1 in
+          -EXTRACT) NOX=0;;
+          -CONFIGONLY) CONFIG=1;;
+          -PONLY) PORTONLY=1;;
+          -STATIC) STATIC="-forcestatic";;
+          -P)   NOPORT=0
+                shift
+                MACHINE=`echo $1 | tr '[A-Z]' '[a-z]'` ;;
+          *)    if [ $SKIP -eq 0 ]; then
+                  SKIP=1
+                fi
+                break ;;
+      esac
+      shift
+     done
+
+     if [ $SKIP -eq 0 ] ; then
+       if [ $CONFIG -ne 1 ] ; then
+       usage
+     fi
+     fi
+
+
+     if [ $CONFIGEXISTS -eq 1 ] ; then
+       getkeywtmp MACHINEID install.config
+       if [ $? -eq 0 ]; then
+        MACHINEONFILE=$TMP
+        if [ $PORTONLY -eq 0 ] ; then
+        MACHINE=$MACHINEONFILE
+        fi
+       fi
+     fi
+
+    if [ -z "$MACHINEONFILE" ] && [ $NOPORT -eq 1 ] && [ $CONFIG -ne 1 ]; then
+      usage
+    fi
+
+     validmachines=`ls Columbus/machine.cfg`
+
+     if [ $CONFIG -ne 1 ]; then
+     OK=0
+     for item in $validmachines
+     do
+       if [ "$MACHINE" = "$item" ]; then OK=1; fi
+     done
+     if [ $OK -ne 1 ] ; then
+      echo "invalid machine_id ... "
+      echo "usage : "
+      echo "install.automatic1 [-static] [-configonly] [-ponly] -p machine_id [standard cpan grad cc parallel runtests] "
+      echo "valid machine_ids are $validmachines"
+      exit
+     else
+       if [ $CONFIGEXISTS -eq 1 ] && [ ! -z "$MACHINEONFILE" ] ; then
+          if [ "$MACHINEONFILE" != "$MACHINE" ]; then
+           if [ $PORTONLY -eq 0 ] ; then
+           echo "found configuration file install.config with different machine_id entry"
+           echo "either remove install.config or give correct MACHINEID "
+           exit
+           fi
+          fi
+       fi
+       if [ -z "$MACHINEONFILE" ] ; then
+        addtoconfig MACHINEID $MACHINE install.config
+       fi
+     fi
+     fi
+
+     if [ $NOX -eq 1 ] && [ $NOPORT -eq 1 ]; then
+      echo "install will neither extract nor port source code "
+      echo "this assumes that the source code has been extracted and ported before"
+     elif [ $NOX -eq 1 ] ; then
+      echo "install will not extract the source code, hence it must have been extracted before"
+     fi
+     if [ $PORTONLY -eq 1 ]; then
+       echo "just porting - no binaries will be created"
+       if [ $NOPORT -eq 1 ]; then
+         echo "port option missing"
+         exit 10
+       fi
+     fi
+
+     if [ -z "\"$*"\" ]; then
+      echo "missing arguments , usage:"
+      echo "install.automatic2 [-static] [-configonly] [-ponly] -p machine_id [standard cpan grad cc parallel runtests] "
+      echo "valid machine_ids are $validmachines"
+      exit
+     fi
+
+# set defaults
+
+   validpackage="CPAN STANDARD GRAD CC DIRECT PARALLEL RUNTESTS"
+    for item in $validpackage
+    do
+     eval "$item=0"
+     eval "${item}TESTS=0"
+    done
+
+
+     while [ $# -gt 0 ];  do
+      echo "packageid $1 "
+      checkpackage $1 $1
+      shift
+     done
+
+     if [ $STANDARD -eq 0 ] ; then
+       checkpackage STANDARD STANDARDOK
+     fi
+
+#    if [[ ( $GRAD -eq 1 || $GRADTESTS -eq 1 )  && $MACHINE = "t3e64" ]] ;  then
+#       echo "gradient package not available for $MACHINE "
+#       GRAD=0; GRADTESTS=0
+#    fi
+
+#    if [[ ( $DIRECT -eq 1 || $DIRECTTESTS -eq 1 )  && $MACHINE = "t3e64" ]] ;  then
+#       echo "direct package not available for $MACHINE "
+#       DIRECT=0; DIRECTTESTS=0
+#    fi
+
+     if [ $PARALLELTESTS -eq 1 ] && [ $MACHINE = "t3e64" ] ; then
+        echo "check for correct Syntax running parallel CI ... "
+        echo " ignoring tests "
+        PARALLELTESTS=0
+     fi
+
+     if ( [ $PARALLEL -eq 1 ] || [ $PARALLELTESTS -eq 1 ] ) && ( [ $MACHINE = "hp" ] || [ $MACHINE = "decalpha32" ] || [ $MACHINE = "sv1" ] ) ;  then
+        echo "parallel package not available for $MACHINE "
+        PARALLEL=0; PARALLELTESTS=0
+     fi
+
+     if [ $MACHINE = "rs6000.4x" ] || [ $MACHINE = "sp2" ] ; then
+         echo "WARNING: compiler might break some codes "
+         echo " run tests manually ... "
+         RUNTESTS=0
+     fi
+
+    if [ $RUNTESTS -eq 0 ]; then
+    for item in $validpackage
+    do
+     eval "${item}TESTS=0"
+    done
+    fi
+
+     return
+   }
+
+  confileproc () {
+#
+#  $1 = absolute path of install.config
+#
+
+# exit if no $GREP found
+
+   getkeyword GREP $1
+   if [ $? -eq 1 ] ; then
+    searchprog  grep GNU GREP ; if [ $? -eq 1 ] ; then  echo "cannot find GNU grep, runtests might not run correct!" ; fi
+    addtoconfig GREP $GREP $1
+   fi
+
+
+   getkeyword TAR $1
+   if [ $? -eq 1 ] ; then
+    searchprog  tar GNU TAR ; if [ $? -eq 1 ] ; then  exit ; fi
+    addtoconfig TAR $TAR $1
+   fi
+
+   chkenv GMAKE
+
+   getkeyword GUNZIP $1
+   if [ $? -eq 1 ] ; then
+    searchprog gunzip NOGNU GUNZIP
+    if [ $? -ne 1 ] ; then
+    addtoconfig GUNZIP $GUNZIP $1
+    fi
+   fi
+
+   searchprog compress NOGNU COMPRESS
+   if [ -z "$COMPRESS" ] && [ -z "$GUNZIP"  ] ; then
+      echo "you need at least gunzip or compress to decompress "
+      echo "the compressed tar distribution files "
+      exit
+   fi
+
+#  chkenv BLASLIBRARY
+#  chkenv LAPACKLIBRARY
+#  chkenv RANLIB
+#  chkenv CPPL
+#  chkenv PERL
+#  chkenv COLUMBUS
+
+   COLUMBUS="$STARTDIR/Columbus"
+   DALTON="$COLUMBUS/source/dalton"
+   MOLCAS=
+   PMOLCAS=
+   VMOLCAS=
+   chkenv DALTON2
+#  valid molcas, molcas_ext, molcas_int64
+#  needed for molcaswrapper.f
+   MCFLAGS=
+#  TURBOCOL="$COLUMBUS/turbocol"
+   addtoconfig COLUMBUS $COLUMBUS $1
+   addtoconfig DALTON $DALTON $1
+#  addtoconfig DALTON2 $DALTON2 $1
+#  addtoconfig TURBOCOL $TURBOCOL $1
+
+# add check ..
+  getkeyword GMAKE $1
+  if [ $? -eq 0 ]; then
+    X=`$GMAKE -v |  $GREP GNU |  wc -l `
+    if [ $X -eq 0 ] ; then
+      echo "your gmake settings do not correspond to GMAKE "
+      exit
+    fi
+  else
+    searchprog make GNU GMAKE
+    if [ $? != 0 ] ; then
+      echo "you must install GNU make "
+      exit
+    else
+      addtoconfig GMAKE $GMAKE $1
+    fi
+  fi
+
+  getkeyword CPPL $1
+  if [ $? -eq 1 ] ; then
+    searchprog cpp NOGNU TEMP
+    if [ $? != 0 ] ; then
+      echo "cannot find preprocessor in your path"
+      echo "your current path: $PATH "
+      searchprog /usr/lib/cpp TEMP
+      if [$? != 0 ] ; then
+         echo "nor in /usr/lib/cpp "
+         searchprog /usr/bin/cpp TEMP
+         if [$? != 0 ] ; then
+          echo "nor in /usr/bin/cpp "
+          echo "exiting ..."
+          exit
+         fi
+      fi
+    fi
+    CPP=$TEMP
+
+     case $MACHINE in
+     "linux"|"linux95.opteron32"|"linuxpgf.opteron32"|"linuxg95.opteron64"|"linuxpgf.opteron64"|"linuxgnu"|"linuxifc"|"linuxifc.opteron32"|"linuxpgf"|"sun") CPPL="$CPP -C -traditional ";;
+     "rs6000"|"rs6000.4.x"|"rs6000.5.x"|"sp4"|"sp4.int64") CPPL="xlc -C -E -traditional ";;
+     *)                 CPPL="$CPP -C" ;;
+     esac
+
+     addtoconfig CPPL "$CPPL" $1
+     echo "added $CPPL to install.config ... "
+  fi
+
+  getkeyword RANLIB $1
+  if [ $? -eq 1 ]; then
+    searchprog ranlib NOGNU RANLIB
+    if [ $? -eq 1 ]; then
+     echo "cannot find ranlib ... "
+     RANLIB="echo no ranlib required"
+    fi
+    addtoconfig RANLIB $RANLIB $1
+  fi
+
+  getkeyword PERL $1
+  if [ $? -eq 1 ] ; then
+    if [ -f $COLUMBUS/colperl ] ; then
+        echo "Using \$COLUMBUS/colperl as perl interpreter"
+        PERL=$COLUMBUS/colperl
+        COLPERL=1
+    else
+        searchprog perl NOGNU PERL
+        if [ $? -eq 1 ]; then
+          echo "cannot find perl "
+          echo "supply appropriate entry ... exiting"
+          exit
+        fi
+        addtoconfig PERL $PERL $1
+    fi
+  fi
+# getkeyword COLUMBUSVERSION $1
+#  if [ $? -eq 1 ]; then
+   COLUMBUSVERSION=$VERSION
+   addtoconfig COLUMBUSVERSION $VERSION $1
+#  fi
+
+  getkeyword BLASLIBRARY $1
+  if [ $? -eq 1 ]; then
+  # missing BLASLIBRARY entry supplying default ,i.e. -lblas
+  echo "install.automatic: BLASLIBRARY not specified; supplying default ... "
+  addtoconfig BLASLIBRARY "-lblas" $1
+  BLASLIBRARY="-lblas"
+  fi
+
+  getkeyword LAPACKLIBRARY $1
+  if [ $? -eq 1 ]; then
+  # missing LAPACKLIBRARY entry supplying default ,i.e. -lblas
+  echo "install.automatic: LAPACKLIBRARY not specified; supplying default ... "
+  addtoconfig LAPACKLIBRARY "-llapack" $1
+  LAPACKLIBRARY="-llapack"
+  fi
+
+  getkeyword INSTALLOPTION $1
+  if [ $? -eq 1 ] ; then
+    addtoconfig INSTALLOPTION "NOGA_INSTALL" $1
+  else
+    cat $1 | sed -e '/^INSTALLOPTION/d' > tmp
+    echo "INSTALLOPTION NOGA_INSTALL" >> tmp
+    cp -f tmp $1
+  fi
+  INSTALLOPTION="NOGA_INSTALL"
+
+
+
+#
+#  additional MOLCAS main directory
+#
+    getkeyword MOLCAS $1
+    getkeyword PMOLCAS $1
+    getkeyword MCFLAGS $1
+
+#
+#  GACOMMUNICATION=TCGMSG       no more necessary (default)
+#  GACOMMUNICATION=MPI*         MPI_MAINDIR optional, MPI_CC, MPI_FC optional
+#                               MPI_STARTUP necessary, MPI_LIBS necessary, SORTEDHOSTLIST optional PSCRIPT optional
+#
+  getkeyword GACOMMUNICATION $1
+  if [ $? -eq 0 ] ; then
+    case $GACOMMUNICATION in
+     "TCGMSG") ;;
+     "MPI"|"MPILAM"|"MPICH"|"MPICH-MYRINET")
+              getkeyword MPI_MAINDIR $1
+              if [ $? -eq 1 ]; then
+               # missing MPI_MAINDIR entry supplying default ,i.e. empty string
+               echo "install.automatic: MPI_MAINDIR not specified; supplying default ... "
+               addtoconfig MPI_MAINDIR " " $1
+               MPI_MAINDIR=" "
+              fi
+              getkeyword MPI_FC $1
+              if [ $? -eq 1 ]; then
+               # missing MPI_FC entry supplying default, i.e. mpif77
+               echo "install.automatic: MPI_FC not specified; supplying default ... "
+               addtoconfig MPI_FC "mpif77" $1
+               MPI_FC="mpif77"
+              fi
+              getkeyword MPI_LD $1
+              if [ $? -eq 1 ]; then
+               # missing MPI_LD entry supplying default, i.e. mpif77
+               echo "install.automatic: MPI_LD not specified; supplying default ... "
+               addtoconfig MPI_LD "mpif77 -Wl,-z,muldefs " $1
+               MPI_LD="mpif77 -Wl,-z,muldefs "
+              fi
+              getkeyword MPI_CC $1
+              if [ $? -eq 1 ]; then
+               # missing MPI_CC entry supplying default, i.e. mpicc
+               echo "install.automatic: MPI_CC not specified; supplying default ... "
+               addtoconfig MPI_CC "mpicc" $1
+               MPI_FC="mpicc"
+              fi
+              getkeyword MPI_LIBS $1
+              if [ $? -eq 1 ]; then
+               # missing MPI_LIBS entry supplying default ,i.e. empty string
+               echo "install.automatic: MPI_LIBS not specified; supplying default ... "
+               addtoconfig MPI_LIBS " " $1
+               MPI_LIBS=" "
+              fi
+              getkeyword MPI_STARTUP $1
+              if [ $? -eq 1 ]; then
+               # missing MPI_STARTUP entry exiting ...
+               echo "install.automatic: MPI_STARTUP not specified; please enter value into install.config ... "
+               exit;
+              fi
+#             getkeyword SORTHOSTLIST $1
+#             if [ $? -eq 1 ]; then
+#              # missing SORTHOSTLIST entry supplying default ,i.e. no
+#              echo "install.automatic: SORTHOSTLIST not specified; supplying default ... "
+#              addtoconfig SORTHOSTLIST "no" $1
+#              SORTHOSTLIST="no"
+#             fi
+              getkeyword PSCRIPT $1
+              if [ $? -eq 1 ]; then
+               # missing PSCRIPT entry supplying default ,i.e. empty string
+               echo "install.automatic: PSCRIPT not specified; supplying default ... "
+               addtoconfig PSCRIPT " " $1
+               PSCRIPT=" "
+               fi
+                ;;
+      *) echo "invalid GACOMMUNICATION entry in $1 "
+              exit 11;;
+    esac
+  else
+     addtoconfig GACOMMUNICATION TCGMSG $1
+     GACOMMUNICATION="TCGMSG"
+  fi
+
+  getkeyword GAVERSION $1
+
+
+  # export all environment variables
+
+    export CPPL PERL RANLIB GMAKE TAR GUNZIP BLASLIBRARY LAPACKLIBRARY COLUMBUS DALTON2 DALTON
+    export INSTALLOPTION COLUMBUSVERSION GREP MCFLAGS MOLCAS GAVERSION
+#   export MPI_FC="$MPI_FC -I$MPI_MAINDIR/include"
+    export MPI_FC MPI_LD
+    export MPI_MAINDIR  MPI_CC MPI_LIBS MPI_STARTUP  PSCRIPT
+
+ }
+
+  decompresstar () {
+
+#
+#  $1 file name root
+#  $2 logfile
+#
+   echo "$1.gz"
+   if [  -f "$1.gz" ]; then
+      if [ -z "$GUNZIP" ] ; then
+        echo "cannot extract $1.gz ...GUNZIP missing "
+        exit
+      fi
+      $GUNZIP "$1.gz"
+      $TAR -xvf $1 >> "$2.extended"
+   elif [  -f "$1.Z" ]; then
+      if [ -z "$COMPRESS" ] ; then
+       echo "cannot extract $1.Z ... COMPRESS missing "
+       exit
+      fi
+      $COMPRESS -d "$1.Z"
+      $TAR -xvf $1 >> "$2.extended"
+   elif [  -f "$1" ] ; then
+      if [ -z "$TAR" ] ; then
+       echo "cannot detar $1 ... TAR missing "
+       exit
+      fi
+      $TAR -xvf $1 >> "$2.extended"
+   else
+      echo "cannot find file $1 "
+      exit
+   fi
+   }
+
+  subruntest () {
+#
+#  $1 package name  $2 subtest list
+#
+      echo "1:$1 2:$2 "
+      exit
+      cd $STARTDIR/TESTS
+      echo " starting $1  package tests ... "
+      $COLUMBUS/runtests $2 > $STARTDIR/tests.log.$1 2>&1
+      if [ $? -eq 0 ]; then
+        echo  " $1 package tests finished "
+        echo  " check summary written to $STARTDIR/tests.log.$1 "
+      else
+        echo " some tests for $1 package fialed to run "
+        echo  " check summary written to $STARTDIR/tests.log.$1 "
+        exit
+      fi
+     return 0
+    }
+
+   installpkg () {
+#
+#  $1 package name
+#  $2 tar file name
+#
+     cd $STARTDIR
+     echo $2  "$STARTDIR/install.log.$1"
+     if [ $NOX -eq 0 ] && [ "$2" != "none" ]; then decompresstar $2 "$STARTDIR/install.log.$1"; fi
+     cd $COLUMBUS
+     echo "starting installation of $1 package"
+     echo " path=" `pwd`
+
+     case $1 in
+     "standard") chmod u+x colinstall.sh
+               $PERL $COLUMBUS/perlshebang $MACHINE `ls *.pl gaunder ../filepp colinp runc prepinp DtoSblas StoDblas`
+               chmod a+rx `ls *.pl prepinp colinp runc DtoSblas StoDblas`
+               cp $COLUMBUS/source/potential/pot_reduce.py $COLUMBUS
+               chmod a+rx $COLUMBUS/pot_reduce.py
+               cd perlscripts
+               $PERL $COLUMBUS/perlshebang $MACHINE `ls *.pl`
+               chmod a+rx `ls *.pl`
+               cd $COLUMBUS ;;
+     "cpan")   if [ -d CPAN ]; then
+                rm -rf CPAN
+               fi
+
+               if [ -z "$COLPERL" ]; then
+    #fp: Devel-PPPort has to be installed separately here:
+                   echo "Starting full CPAN installation ..."
+                   cd $COLUMBUS/../TOOLS/CPAN/Devel-PPPort-3.19
+                   perl Makefile.PL > $STARTDIR/install.log.cpan 2>&1
+                   make >> $STARTDIR/install.log.cpan 2>&1
+                   export CURSES_CFLAGS=-I$COLUMBUS/../TOOLS/CPAN/Devel-PPPort-3.19
+                   export CURSES_LDFLAGS=-lncursesw
+
+                   $PERL $COLUMBUS/perlshebang $MACHINE $STARTDIR/TOOLS/CPAN/install.cpan.new
+                    chmod u+x $STARTDIR/TOOLS/CPAN/install.cpan.new
+                   $STARTDIR/TOOLS/CPAN/install.cpan.new $MACHINE >> $STARTDIR/install.log.cpan 2>&1
+                else
+                    echo "Starting colperl CPAN installation ..."
+
+                    mkdir $COLUMBUS/CPAN
+                    cp $STARTDIR/TOOLS/CPAN/perlmenu.v4.0/menuutil.pl $COLUMBUS/CPAN
+                    cp $COLUMBUS/perlscripts/colib*.pm $COLUMBUS/CPAN
+                    cp $COLUMBUS/perlscripts/perlmenu.pm $COLUMBUS/CPAN
+                fi
+
+               cd $COLUMBUS
+               $PERL $COLUMBUS/perlshebang $MACHINE *.pl gaunder colinp runc prepinp DtoSblas StoDblas perlscripts/*.pl
+
+               cd $STARTDIR/TOOLS/CPAN/
+             # tar -xvf filepp-1.3.0.tar >> "$STARTDIR/install.log.$1" 2>&1
+               cd filepp-1.3.0
+               ./configure >> $STARTDIR/install.log.cpan 2>&1
+               $PERL $COLUMBUS/perlshebang $MACHINE filepp 2> /dev/null
+               cp filepp $STARTDIR
+               cd $STARTDIR;;
+     esac
+     case $1 in
+     "standard"|"grad"|"parallel")
+                           if [ $NOPORT -eq 1 ] ; then
+                           ./colinstall.sh $STATIC -v $1 > $STARTDIR/install.log.$1 2>&1
+                           else
+                             if [ $PORTONLY -eq 1 ]; then
+                              ./colinstall.sh $STATIC -v $1 -p $MACHINE -ponly  > $STARTDIR/install.log.$1 2>&1
+                             else
+                              ./colinstall.sh $STATIC -v $1 -p $MACHINE  > $STARTDIR/install.log.$1 2>&1
+                             fi
+                           fi;;
+     "CC")
+        chmod u+x $COLUMBUS/CC/installCC.pl
+        $COLUMBUS/CC/installCC.pl > $STARTDIR/install.log.$1 2>&1
+     ;;
+     esac
+     if [ $? -eq 0 ] ; then
+      if [ $PORTONLY -eq 0 ] ; then
+      echo "$1 package installation successful"
+      addtoconfig $1 " " $STARTDIR/install.config
+      else
+      echo "$1 package porting successful"
+      fi
+     else
+      echo "installation of $1 package failed "
+      echo " check $STARTDIR/install.log.$1 for details"
+      exit
+     fi
+     return 0
+   }
+
+
+###########################################################################
+
+  VERSION="7.0"
+  echo " "
+  echo " install.automatic bash version 06/2010 (tm) "
+  echo " "
+
+# analyse command options
+
+  STARTDIR=`pwd`
+
+  if [ -f "$STARTDIR/install.config" ] ; then
+    CONFIGEXISTS=1
+    cleanconfig
+  else
+    CONFIGEXISTS=0
+    touch $STARTDIR/install.config
+  fi
+#
+#  command argument processing and error check
+#
+
+  comlineproc `echo $@ | tr '[a-z]' '[A-Z]'`
+
+#
+# configuration file processing and software check
+#
+
+  confileproc "$STARTDIR/install.config"
+
+#
+#  print important environment variables
+#  and export them
+#
+
+   printstatus
+
+   if [ $CONFIG -eq 1 ] ; then
+     echo "generation of install.config file finished "
+     echo "exiting  (-configonly set) "
+     exit;
+   fi
+
+#
+#  start installation
+#
+
+   cd $STARTDIR
+   if [ ! -d "Columbus" ] ; then
+     mkdir "Columbus"
+   fi
+
+#
+#   BLAS/LAPACK
+#
+
+
+   if [ -z "$BLASLIBRARY" ] || [ -z "$LAPACKLIBRARY" ]; then
+    if [ $NOX -eq 0 ] ; then
+      decompresstar tools.lapack.tar "$STARTDIR/install.log.lapack"
+    else
+      echo " BLASLIBRARY and/or LAPACKLIBRARY not detected and -nox invoked "
+      echo " either add corresponding settings to install.config or run without "
+      echo " -nox option"
+      exit
+    fi
+    cd $STARTDIR/TOOLS/LAPACK
+    rm -f install.config
+    $GREP LIB $STARTDIR/install.config > install.config
+    echo "starting lapack/blas installation ... "
+
+
+      spatt $MACHINE rs6000
+      X=$?
+      spatt $MACHINE sp2
+      Y=$?
+     echo "::: $X $y $MACHINE "
+####### blas
+    if [ -z "$BLASLIBRARY" ]; then
+        echo " ... installing blas "
+      if [[ $X  -eq 0 ||  $Y -eq 0 ]] ; then
+        ./install.lapack -p rs6000 blas >> $STARTDIR/install.log.lapack
+      else
+        ./install.lapack -p $MACHINE blas >> $STARTDIR/install.log.lapack
+      fi
+      if [ $? -ne 0 ] ; then
+        echo "installation of blas routines failed " >>  $STARTDIR/install.log.lapack
+        echo "check logfiles in $STARTDIR/TOOLS/LAPACK "
+        echo "installation of blas routines failed "
+        exit
+      else
+        echo "installation of blas routines successful "
+        getkeyword BLASLIBRARY $STARTDIR/TOOLS/LAPACK/install.config
+        addtoconfig BLASLIBRARY $BLASLIBRARY $STARTDIR/install.config
+      fi
+    fi
+
+####### lapack
+
+    if [ -z "$LAPACKLIBRARY" ]; then
+        echo " ... installing lapack "
+      if [[ $X  -eq 0 ||  $Y -eq 0 ]]; then
+        ./install.lapack -p rs6000 lapack >> $STARTDIR/install.log.lapack
+      else
+        ./install.lapack -p $MACHINE lapack >> $STARTDIR/install.log.lapack
+      fi
+      if [ $? -ne 0 ] ; then
+        echo "installation of lapack routines failed " >>  $STARTDIR/install.log.lapack
+        echo "check logfiles in $STARTDIR/TOOLS/LAPACK "
+        echo "installation of lapack routines failed "
+        exit
+      else
+        echo "installation of lapack routines successful "
+        getkeyword LAPACKLIBRARY $STARTDIR/TOOLS/LAPACK/install.config
+        addtoconfig LAPACKLIBRARY $LAPACKLIBRARY $STARTDIR/install.config
+      fi
+    fi
+   fi
+
+   if [ $CPAN -eq 1 ] ; then
+     installpkg cpan cpan.tar
+   fi
+   if [ $STANDARD -eq 1 ] ; then
+     installpkg standard "standard.tar"
+    fi
+   if [ $GRAD -eq 1 ] ; then
+     installpkg grad "none"
+   fi
+   if [ $CC -eq 1 ] ; then
+     installpkg CC "none"
+   fi
+   if [ $PARALLEL -eq 1 ] ; then
+     installpkg parallel "none"
+   fi
+#  if [ $DIRECT -eq 1 ] ; then
+#    installpkg direct "turbocol.tar"
+#  fi
+#
+#  make a copy of install.config to COLUMBUS main directory
+#  this copy is needed for runc in order
+#  to determine how to start up the parallel programs
+#
+   cp -f $STARTDIR/install.config $COLUMBUS/install.config
+
+   cd $STARTDIR
+   if [ $RUNTESTS -eq 1 ]; then
+     if [ ! -d TESTS ] ; then
+       mkdir TESTS
+       echo "creating directory $STARTDIR/TESTS"
+     else
+       rm -rf TESTS
+       echo "removing existing directory $STARTDIR/TESTS"
+     fi
+
+    if [ $STANDARDTEST -eq 1]; then
+      subruntest standard " ARGOS COLIB DALTON TRAN SINGLEPOINT FFIELD SPINORBIT "
+    fi
+
+    if [ $GRADTEST -eq 1]; then
+      subruntest grad "GEOMOPT RGF FREQ"
+    fi
+#   if [ $DIRECTTEST -eq 1]; then
+#        subruntest direct "TRAN_D DIRECT"
+#    fi
+ fi  # runtests
+

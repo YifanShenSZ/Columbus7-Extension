@@ -13,8 +13,9 @@
 8. ./install.automatic parallel
 
 * Suggestion
-1. Better use openmpi rather than intel mpi
+1. The install.automatic packed in the installation package may have trouble on late shell. A modified version debugged on ubuntu 16 and 18 is provided in Modification
 2. The install.config packed in the installation package is for gnu compiler, refer to the version provided here in Modification for intel compiler
+3. Better use openmpi rather than intel mpi
 
 ## Modification
 * For minimum energy crossing point search, replace the polyhess.x in $COLUMBUS
