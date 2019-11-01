@@ -1,7 +1,7 @@
 #!bin/bash
 
 # Command line input
-usage="Create single point job directories
+usage="Create Columbus7 single point job directories naming from 1 to the number of geometries in current directory
 
 $(basename "$0") [-h]
                  InputPath NAtoms GeomPath
