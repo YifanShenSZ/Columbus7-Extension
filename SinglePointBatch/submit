@@ -1,20 +1,54 @@
 #!bin/bash
 
-# This is to resubmit failed Columbus7 job or submit new job. Take an argument $1 = NDirectory
+# Command line input
+usage="Submit new Columbus7 job or resubmit failed job
 
-for ((i=0; i<$1; i++)); do
-    cd $i
-    if [ -f 'runc.log' ]; then
-        success=`cat runc.log |grep timings`
-        if [ ! -n "$success" ]; then
-            if [ ! -d WORK ]; then
-                echo 'Failed job '$i
+$(basename "$0") [-h] [-s n]
+
+optional arguments:
+  -h             show this help message and exit
+  -s             queuing system (default = slurm)"
+
+queue='slurm'
+while getopts ':hs:' option; do
+  case "$option" in
+    h) echo "$usage"
+       exit;;
+    s) queue=$OPTARG;;
+    :) printf "missing argument for -%s\n" "$OPTARG" >&2
+       echo "$usage" >&2
+       exit;;
+   \?) printf "illegal option: -%s\n" "$OPTARG" >&2
+       echo "$usage" >&2
+       exit;;
+  esac
+done
+shift $((OPTIND - 1))
+
+# Do the job
+for entry in * ; do
+    if [ -d $entry ]; then # This is a directory
+        cd $entry
+        if [ -f 'geom' ]; then # This is a job directory
+            if [ ! -f 'runc.log' ]; then # This is a new job
+                cp ../RunColumbus .
                 sbatch RunColumbus
+            else # This job has started
+                success=`cat runc.log |grep timings`
+                if [ ! -n "$success" ]; then # This job has not yet succeeded
+                    error=`cat runc.log |grep 'Error occured!'`
+                    timeout=`cat ${queue}* |grep TIMEOUT`
+                    if [ -n "${error}${timeout}" ]; then # This job has failed
+                        echo 'Failed job '$entry
+                        if [ -d WORK ]; then # Remove Columbus7 scratch
+                            rm -r WORK
+                        fi
+                        rm ${queue}* # Remove queuing system log
+                        sbatch RunColumbus
+                    fi
+                fi
             fi
         fi
-    else
-        cp ../RunColumbus ./
-        sbatch RunColumbus
+        cd ..
     fi
-    cd ..
 done

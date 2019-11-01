@@ -1,28 +1,60 @@
 #!bin/bash
 
-# User input
-src=/home-4/yshen57@jhu.edu/data/yshen/C5H9O/Columbus/src # Columbus input template directory
-NAtoms=15
+# Command line input
+usage="Create single point job directories
+
+$(basename "$0") [-h] [-s n]
+                 InputPath NAtoms GeomPath
+
+positional arguments:
+  InputPath      location of Columbus input template
+  NAtoms         number of atoms in the molecule
+  GeomPath       location of the appended geometry file
+
+optional arguments:
+  -h             show this help message and exit
+  -s             skip first n geometry(ies) (default = 0)"
+
+skip=0
+while getopts ':hs:' option; do
+  case "$option" in
+    h) echo "$usage"
+       exit;;
+    s) skip=$OPTARG;;
+    :) printf "missing argument for -%s\n" "$OPTARG" >&2
+       echo "$usage" >&2
+       exit;;
+   \?) printf "illegal option: -%s\n" "$OPTARG" >&2
+       echo "$usage" >&2
+       exit;;
+  esac
+done
+shift $((OPTIND - 1))
 
 # Do the jub
-i=0
+i=1
 count=1
+skip = $[skip*$2] # Actual number of lines to skip
 while read -r line; do
-    if [ $count == 1 ]; then
-        if [ ! -d $i ]; then
-            mkdir $i
-        fi
-        cd $i
-        cp $src/* .
-        echo "$line" > geom
-        count=$[count+1]
-    elif [ $count == $NAtoms ]; then
-        echo "$line" >> geom
-        cd ..
-        i=$[i+1]
-        count=1
+    if [ $skip > 0 ]; then
+        skip=$[skip-1]
     else
-        echo "$line" >> geom
-        count=$[count+1]
+        if [ $count == 1 ]; then # Start a new geometry
+            if [ ! -d $i ]; then
+                mkdir $i
+            fi
+            cd $i
+            cp $1/* .
+            echo "$line" > geom
+            count=$[count+1]
+        elif [ $count == $2 ]; then # End of current geometry
+            echo "$line" >> geom
+            cd ..
+            i=$[i+1]
+            count=1
+        else # Keep working on current geometry
+            echo "$line" >> geom
+            count=$[count+1]
+        fi
     fi
-done < geom.all
+done < $3

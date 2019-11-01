@@ -28,7 +28,7 @@ program main
     close(99)
     cartdim=3*NAtoms
     chartemp='Columbus7'; call DefineInternalCoordinate(chartemp,intdim)
-    q0=InternalCoordinateq(r0,intdim,cartdim)!Reference internal geometry
+    allocate(q0(intdim)); q0=InternalCoordinateq(r0,intdim,cartdim)!Reference internal geometry
     allocate(q(intdim)); allocate(r(cartdim))
 open(unit=99,file='geom.all',status='replace')!Modification starts here
     do i=-5,5!Example: start from q0, displace 1st internal coordinate
