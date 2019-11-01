@@ -8,6 +8,7 @@ $(basename "$0") [-h] [-s n]
 optional arguments:
   -h             show this help message and exit
   -s             queuing system (default = slurm)"
+# We will read the queuing system log to determine whether a job is failed
 
 queue='slurm'
 while getopts ':hs:' option; do
