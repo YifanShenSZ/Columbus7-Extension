@@ -1,7 +1,7 @@
 #!bin/bash
 
 # Command line input
-usage="Delete unnecessary Columbus7 files and directories for collecting in current directory
+usage="Remove unnecessary Columbus7 files and directories for collecting in current directory
 
 $(basename "$0") [-h]
 
