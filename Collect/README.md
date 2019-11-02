@@ -2,6 +2,8 @@
 
 After a batch of Columbus7 single point calculation, to collect data:
 
-    bash collect $1 $2
+    python3 collect BatchPath NDirectory NState
 
-where $1 = NState, $2 = NDirectory. Single point information including geometry, energy, energy gradient, interstate coupling will be concatenated
+Use -h or --help for details
+
+Single point information including geometry, energy, energy gradient, interstate coupling will be appended
