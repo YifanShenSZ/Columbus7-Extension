@@ -6,7 +6,7 @@ To run a batch of Columbus7 single point calculation:
 3. bash create.sh InputPath NAtoms GeomPath (This step creates directories naming from 1 to the number of geometries, which are Columbus7 single point job directories)
 4. Modify RunColumbus to fit your queue, then bash submit.sh (This step submits the batch jobs. If some jobs fail, bash again)
 
-Optionally, after not every job is finished, you may bash clean.sh to remove unnecessary files and directories for collecting
+Optionally, after not every job has finished, you may bash clean.sh to remove unnecessary files and directories for collecting
 
 All shell scripts support -h argument to show details
 
