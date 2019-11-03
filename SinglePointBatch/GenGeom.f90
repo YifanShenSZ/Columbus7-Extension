@@ -10,10 +10,10 @@ program main
     integer::NAtoms,intdim,cartdim
     integer,allocatable,dimension(:)::ElementNumber
     character*2,allocatable,dimension(:)::ElementSymbol
-    real*8,allocatable,dimension(:)::mass,r0
+    real*8,allocatable,dimension(:)::mass,r0,q0
 !Work variable
     character*32::chartemp; integer::i,j; real*8::dbletemp
-    real*8,allocatable,dimension(:)::q0,q,r
+    real*8,allocatable,dimension(:)::q,r
 !Initialize
     open(unit=99,file='geom',status='old')!Read molecule detail
         NAtoms=0; do; read(99,*,iostat=i); if(i/=0) exit; NAtoms=NAtoms+1; end do; rewind 99
