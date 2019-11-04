@@ -93,7 +93,7 @@ program main
     close(99)
     !Convert internal normal mode to Cartesian, output visualization
     allocate(cartmode(cartdim,intdim))
-    call InternalMode2CartesianMode(freq,L,InternalDimension,B,cartmode,CartesianDimension)
+    call InternalMode2CartesianMode(freq,L,intdim,B,cartmode,cartdim)
     chartemp='geom.log'
     call Avogadro_Vibration(NAtoms,ElementSymbol,r0/AInAU,intdim,freq/cm_1InAu,cartmode,FileName=chartemp)
     write(*,'(1x,A77)')'To visualize the molecular structure and vibration, open geom.log in Avogadro'
