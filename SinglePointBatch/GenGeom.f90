@@ -27,15 +27,16 @@ program main
     cartdim=3*NAtoms
     chartemp='Columbus7'; call DefineInternalCoordinate(chartemp,intdim)
     allocate(q0(intdim)); q0=InternalCoordinateq(r0,intdim,cartdim)!Reference internal geometry
+!Modification starts here
     allocate(q(intdim)); allocate(r(cartdim))
-open(unit=99,file='geom.all',status='replace')!Modification starts here
-    do i=-5,5!Example: start from q0, displace 1st internal coordinate
-        q=q0
-        q(1)=q(1)+dble(i)*0.04d0
-        r=CartesianCoordinater(q,cartdim,intdim,mass=mass,r0=r0)
-        do j=1,NAtoms
-            write(99,'(1x,A2,2x,F5.1,4F14.8)')ElementSymbol(j),ElementNumber(j),r(3*j-2:3*j),mass(j)/AMUInAU
+    open(unit=99,file='geom.all',status='replace')
+        do i=-5,5!Example: start from q0, displace 1st internal coordinate
+            q=q0
+            q(1)=q(1)+dble(i)*0.04d0
+            r=CartesianCoordinater(q,cartdim,intdim,mass=mass,r0=r0)
+            do j=1,NAtoms
+                write(99,'(1x,A2,2x,F5.1,4F14.8)')ElementSymbol(j),ElementNumber(j),r(3*j-2:3*j),mass(j)/AMUInAU
+            end do
         end do
-    end do
-close(99)
+    close(99)
 end program main
