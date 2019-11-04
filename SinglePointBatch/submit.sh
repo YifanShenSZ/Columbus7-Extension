@@ -4,13 +4,16 @@
 usage="Submit new Columbus7 job or resubmit failed job in current directory
 
 $(basename "$0") [-h] [-s n]
+                 JobScriptPath
+
+positional arguments:
+  JobScriptPath  location of the job script for your queuing system
 
 optional arguments:
   -h             show this help message and exit
   -s             queuing system (default = slurm)"
-# We will read the queuing system log to determine whether a job is failed
 
-queue='slurm'
+queue='slurm' # We will read the queuing system log to determine whether a job is failed
 while getopts ':hs:' option; do
   case "$option" in
     h) echo "$usage"
@@ -26,14 +29,16 @@ while getopts ':hs:' option; do
 done
 shift $((OPTIND - 1))
 
+JobScript=$(basename $1)
+
 # Do the job
 for entry in * ; do
     if [ -d $entry ]; then # This is a directory
         cd $entry
         if [ -f 'geom' ]; then # This is a job directory
             if [ ! -f 'runc.log' ]; then # This is a new job
-                cp ../RunColumbus .
-                sbatch RunColumbus
+                cp $1 .
+                sbatch $JobScript
             else # This job has started
                 success=`cat runc.log |grep timings`
                 if [ ! -n "$success" ]; then # This job has not yet succeeded
@@ -45,7 +50,7 @@ for entry in * ; do
                             rm -r WORK
                         fi
                         rm ${queue}* # Remove queuing system log
-                        sbatch RunColumbus
+                        sbatch $JobScript
                     fi
                 fi
             fi

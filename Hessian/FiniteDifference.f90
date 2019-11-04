@@ -77,6 +77,7 @@ program main
         end do
         write(99,*)Hessian
     close(99)
+    write(*,'(1x,A92)')'hessian is a Columbus7 format file containing the Hessian matrix, serving as Columbus7 input'
 !Vibration analysis
     !Run Wilson GF method for vibrational frequency and internal normal mode, output vibrational frequency
     allocate(freq(intdim)); allocate(L(intdim,intdim)); allocate(Linv(intdim,intdim))
@@ -91,10 +92,11 @@ program main
         write(99,'(A4,A1,A15)')'Mode',char(9),'Frequency/cm^-1'
         do i=1,intdim; write(99,'(I4,A1,F14.8)')i,char(9),freq(i)/cm_1InAu; end do
     close(99)
+    write(*,'(1x,A65)')'VibrationalFrequency.txt is a table of vibrational frequency(ies)'
     !Convert internal normal mode to Cartesian, output visualization
     allocate(cartmode(cartdim,intdim))
     call InternalMode2CartesianMode(freq,L,intdim,B,cartmode,cartdim)
     chartemp='geom.log'
     call Avogadro_Vibration(NAtoms,ElementSymbol,r0/AInAU,intdim,freq/cm_1InAu,cartmode,FileName=chartemp)
-    write(*,'(1x,A77)')'To visualize the molecular structure and vibration, open geom.log in Avogadro'
+    write(*,'(1x,A79)')'To visualize the molecular structure and vibration, open geom.log with Avogadro'
 end program main
