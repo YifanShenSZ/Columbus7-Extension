@@ -1,8 +1,2 @@
 *.exe
-*.mod
-.vs/
-*.sln
-Debug/
-My Advisor Results - */
-*.u2d
-*.vfproj
+__pycache__/
