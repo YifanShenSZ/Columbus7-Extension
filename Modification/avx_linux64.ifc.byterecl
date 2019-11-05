@@ -3,10 +3,10 @@ FORTRAN=ifort -c -assume byterecl
 # specify a path to the GSL libraries
 IDGSL=/usr/include/gsl
 LDGSL=/usr/lib64
-FFLAGS=  -i8 -O2 -m64 xavx -mtune=core-avx2 -mkl -no-prec-div -fp-model fast=2
+FFLAGS=  -i8 -O2 -m64 -xavx -mtune=core-avx2 -mkl -no-prec-div -fp-model fast=2
 FFLAGSCARE= -i8 -O0 -g -noautomatic
 FFLAGS2= -i8 -O2 -noautomatic 
-CFLAGS= -DLINUX -DBIT64 -DINT64 -m64 xavx -mtune=core-avx2 -mkl -O2 -no-prec-div -fp-model fast=2
+CFLAGS= -DLINUX -DBIT64 -DINT64 -m64 -xavx -mtune=core-avx2 -mkl -O2 -no-prec-div -fp-model fast=2
 CC=icc -c -O $(CFLAGS)
 CCMOLDEN=icc -c -DDOBACK -DHASTIMER -DCOLOR_OFFSET=0.0
 LOADER=ifort -z muldefs -assume byterecl
