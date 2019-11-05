@@ -1,0 +1,50 @@
+# use byterecl for communication with C programs
+FORTRAN=ifort -c -assume byterecl
+# specify a path to the GSL libraries
+IDGSL=/usr/include/gsl
+LDGSL=/usr/lib64
+FFLAGS=  -i8 -O2 -m64 xavx -mtune=core-avx2 -mkl -no-prec-div -fp-model fast=2
+FFLAGSCARE= -i8 -O0 -g -noautomatic
+FFLAGS2= -i8 -O2 -noautomatic 
+CFLAGS= -DLINUX -DBIT64 -DINT64 -m64 xavx -mtune=core-avx2 -mkl -O2 -no-prec-div -fp-model fast=2
+CC=icc -c -O $(CFLAGS)
+CCMOLDEN=icc -c -DDOBACK -DHASTIMER -DCOLOR_OFFSET=0.0
+LOADER=ifort -z muldefs -assume byterecl
+MOLDENLIBS= -L/usr/X11R6/lib -lX11 -lm
+AR=ar rv
+ARX=ar x
+#
+#  with "-assume byterecl" RCLU4 has to be taken out
+#  RCLU4 = record length specification in units of 4 bytes.
+#  see CPPDIR, KEYWORDS,DKEYWORDS
+#
+CPPDIR=-I$(DALTON_DIR)/include -DCOLUMBUS -DSYS_LINUX -DPTR64 -Df90  -DVAR_BLAS3 -DINT64 -DVAR_SIRBIG
+SPEC=$(COLUMBUS)/special/UNIX
+KOPC=$(SPEC)/fdate.c $(SPEC)/fwtime.c $(SPEC)/hostnm.c \
+$(SPEC)/flushstdout.c $(SPEC)/fsize.c $(SPEC)/getputvec.c $(SPEC)/workdir.c
+CDEF=icc  -c  -DFLUSH -DINT64 -DEXTNAME  -I$(SPEC)
+YES=1
+FIXED=-fixed
+FREE=-free
+OBJECTSCARE=mcscf8.o gdiis.o givens.o suscal.o transmo.o polyhes.o utilities.o dzero.o 
+# loop calculation is possibly cracked by ifort 11.0
+# not yet determined where exactly
+OBJECTSCAREFREE=   ciudg_loop.o    potentialmodfree.o potenrg.o  
+BLASCONVERSION=StoDblas
+KEYWORDS=jsc:unix:linux:milstd1753:bit64:format:blas2:blas3:pipemode:f90:f95:int64:molcas_int64:noenvsupport
+# NO4XCHECK: switch off 4-external density matrix element initialization
+#            causes difficulties when using parallel code but seems to have no impact on the computed density matrix elements
+#            needs to be understood in detail
+DKEYWORDS=-DJSC -DUNIX -DLINUX -DMILSTD1753 -DBIT64 -DBLAS2 -DBLAS3 -DPIPEMODE -DF90 -DF95 -DINT64 -DMOLCAS_INT64 -DNOENVSUPPORT -DGA50
+DALTON2CPP=-DVAR_IFC -DSYS_LINUX -D_FILE_OFFSET_BITS=64 -DVAR_MFDS -DIMPLICIT_NONE -DVAR_SIRBIG
+#MOLCASOBS=$(MOLCASOBS70P266)
+#MOLCASOBS=$(MOLCASOBS72P40)
+#MOLCASOBS=$(MOLCASOBS73P306)
+#MOLCASOBS=$(MOLCASOBS75P560)
+MOLCASOBS=$(MOLCASOBS77P49)
+MOLCASFF=$(FFLAGS)
+PARALLELKEYS=parallel:mpi
+DPARALLELKEYS=-DPARALLEL -DMPI
+MOLCASKEYS=molcas:molcas_int64
+DMOLCASKEYS=-DMOLCAS -DMOLCAS_INT64
+STATIC=-static -static-libgcc
