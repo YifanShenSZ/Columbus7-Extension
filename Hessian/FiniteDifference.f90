@@ -2,8 +2,7 @@
 !Usage : ./FiniteDifference.exe n
 !Input : intcfl, geom (the geometry to calculate Hessian)
 !        geom.all, cartgrd.drt1.state+str(n)+.all (loop information)
-!Output: hessian (for Columbus7)
-!        freq.out, L.out (for NormalModeLoop.exe)
+!Output: freq.out, L.out (for NormalModeLoop.exe)
 !        VibrationalFrequency.txt, geom.log (for user)
 program main
     use General; use Mathematics; use LinearAlgebra
@@ -66,18 +65,6 @@ program main
     forall(i=1:intdim)
         Hessian(:,i)=(intgrad(:,2*i-1)-intgrad(:,2*i))/(q(i,2*i-1)-q(i,2*i))
     end forall
-    open(unit=99,file='hessian',status='replace')!Output for Columbus7
-        do i=1,intdim
-            do j=1,intdim,8
-                do k=j,min(j+7,intdim)
-                    write(99,'(F13.6)',advance='no')Hessian(k,i)
-                end do
-                write(99,*)
-            end do
-        end do
-        write(99,*)Hessian
-    close(99)
-    write(*,'(1x,A92)')'hessian is a Columbus7 format file containing the Hessian matrix, serving as Columbus7 input'
 !Vibration analysis
     !Run Wilson GF method for vibrational frequency and internal normal mode, output vibrational frequency
     allocate(freq(intdim)); allocate(L(intdim,intdim)); allocate(Linv(intdim,intdim))

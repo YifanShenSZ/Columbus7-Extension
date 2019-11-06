@@ -31,12 +31,12 @@ program main
     allocate(q(intdim)); allocate(r(cartdim))
     open(unit=99,file='geom.all',status='replace')
         do i=1,intdim!Start from q0, displace +- along each internal coordinate
-            if(GeometryTransformation_IntCDef(i).motion(1).type=='stretching') then!Bond length: 0.01A
-                q=q0; q(i)=q(i)+0.01d0*AInAU; call WriteGeom()
-                q=q0; q(i)=q(i)-0.01d0*AInAU; call WriteGeom()
-            else!Angle: 0.01
-                q=q0; q(i)=q(i)+0.01d0; call WriteGeom()
-                q=q0; q(i)=q(i)-0.01d0; call WriteGeom()
+            if(GeometryTransformation_IntCDef(i).motion(1).type=='stretching') then!Bond length: 0.001A
+                q=q0; q(i)=q(i)+0.001d0*AInAU; call WriteGeom()
+                q=q0; q(i)=q(i)-0.001d0*AInAU; call WriteGeom()
+            else!Angle: 0.001
+                q=q0; q(i)=q(i)+0.001d0; call WriteGeom()
+                q=q0; q(i)=q(i)-0.001d0; call WriteGeom()
             end if
         end do
     close(99)
