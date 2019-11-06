@@ -61,5 +61,10 @@ Columbus7 originates in 1980 and preserves many historical codes. Besides, the u
 2. By default GDIIS searches for minimum with BFGS. To search for saddle point, replace bfgs at the last line in gdiisin with sadd
 
 ### Weird stuff
+* Basis and orbital
 1. To use special basis, do not run prepinp
 2. The number of each kind of orbitals appearing in cidrtin cannot exceed 256, including the frozen orbitals
+
+* Interactive input (colinp)
+1. In CI input, display bug occurs for font size > 12
+2. In hessian input, perl bug occurs for font size > 8
