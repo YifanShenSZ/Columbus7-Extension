@@ -56,10 +56,10 @@ Columbus7 originates in 1980 and preserves many historical codes. Besides, the u
 #### Common bug
 * 'maxbl' too small: increase maxbl in cisrtin, usually up to 200000
 
+### Geometry optimization
+1. NROOT also specifies which surface to optimize on. You can overwrite it with the transition moment input transmomin (i.e. set computing transition moment between m-th and m-th state to optimize on m-th surface)
+2. By default GDIIS searches for minimum with BFGS. To search for saddle point, replace bfgs at the last line in gdiisin with sadd
+
 ### Weird stuff
-* Basis and orbital
 1. To use special basis, do not run prepinp
 2. The number of each kind of orbitals appearing in cidrtin cannot exceed 256, including the frozen orbitals
-
-* Geometry optimization
-1. NROOT also specifies which surface to optimize on. You can overwrite it with the transition moment input transmomin (i.e. set computing transition moment between m-th and m-th state to optimize on m-th surface)
