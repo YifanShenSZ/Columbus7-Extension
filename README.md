@@ -26,6 +26,22 @@ Columbus7 originates in 1980 and preserves many historical codes. Besides, the u
 1. Installation may fail with intel mpi. For now openmpi always works
 2. Replace certain files with their counterparts in Modification
 
+### Basis set
+* To use special basis, do not run prepinp
+
+* The basis file ($COLUMBUS/source/iargos/basis/*.bas) format is:
+1. Basis name
+2. Number of basis types
+3. Number of alphas, l + 1, number of contracted basis
+4. Alpha value, contraction coefficients
+
+* The basis input daltaoin format is:
+1. (s for spherical basis, c for Cartesian basis), type of atoms, unknown flag, unknown flag
+2. Atom number, number of this type of atoms, number of l types, number of s orbitals, number of p orbitals, ...
+3. Atom coordinate
+4. H marking the head of a basis, number of alphas, number of contracted basis. Basis are sorted by l
+5. Alpha value, contraction coefficients
+
 ### MRCI
 #### Computation cost
 * The upper limit of CI expansion on 24 core avx2 processor computer in 2019 is ~ 200,000,000
@@ -61,9 +77,8 @@ Columbus7 originates in 1980 and preserves many historical codes. Besides, the u
 2. By default GDIIS searches for minimum with BFGS. To search for saddle point, replace bfgs at the last line in gdiisin with sadd
 
 ### Weird stuff
-* Basis and orbital
-1. To use special basis, do not run prepinp
-2. The number of each kind of orbitals appearing in cidrtin cannot exceed 256, including the frozen orbitals
+* Orbital
+1. The number of each kind of orbitals appearing in cidrtin cannot exceed 256, including the frozen orbitals
 
 * Interactive input (colinp)
 1. In CI input, display bug occurs for font size > 12
