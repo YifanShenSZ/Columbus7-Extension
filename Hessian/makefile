@@ -1,7 +1,14 @@
-libdir = /home-4/yshen57@jhu.edu/lib
-incdir = /home-4/yshen57@jhu.edu/include
+libdir = /usr/local/lib
+incdir = /usr/local/include
 
-GenLoop.exe FiniteDifference.exe NormalModeLoop.exe: GenLoop.f90 FiniteDifference.f90 NormalModeLoop.f90
-	ifort -I$(incdir) -L$(libdir) -lFL -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -O3 GenLoop.f90 -o GenLoop.exe
-	ifort -I$(incdir) -L$(libdir) -lFL -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -O3 FiniteDifference.f90 -o FiniteDifference.exe
-	ifort -I$(incdir) -L$(libdir) -lFL -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -O3 NormalModeLoop.f90 -o NormalModeLoop.exe
+.PHONY: make
+make: GenLoop.exe FiniteDifference.exe NormalModeLoop.exe
+
+GenLoop.exe: GenLoop.f90
+	ifort -I$(incdir) -L$(libdir) -lFL -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -O3 $^ -o GenLoop.exe
+
+FiniteDifference.exe: FiniteDifference.f90
+	ifort -I$(incdir) -L$(libdir) -lFL -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -O3 $^ -o FiniteDifference.exe
+
+NormalModeLoop.exe:  NormalModeLoop.f90
+	ifort -I$(incdir) -L$(libdir) -lFL -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -O3 $^ -o NormalModeLoop.exe

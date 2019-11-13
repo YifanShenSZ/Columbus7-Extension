@@ -1,6 +1,7 @@
-!Prepare finite difference geometries for computing ground state Hessian
-!Input : intcfl, geom (the geometry to calculate Hessian)
-!Output: geom.all (loop geometries for finite difference)
+!Generate a loop around a certain geometry
+!Input : internal coordinate definition, geom
+!Output: geom.all
+!Dependency: my Fortran-Library, as written in makefile
 program main
     use General; use Mathematics; use LinearAlgebra
     use NonlinearOptimization; use Chemistry
@@ -11,7 +12,7 @@ program main
     character*2,allocatable,dimension(:)::ElementSymbol
     real*8,allocatable,dimension(:)::ElementNumber,mass,r0,q0
 !Work variable
-    character*32::chartemp; integer::i,j
+    character*32::chartemp; logical::flag; integer::i,j
     real*8,allocatable,dimension(:)::q,r
 !Initialize
     open(unit=99,file='geom',status='old')!Read reference geometry
@@ -20,24 +21,27 @@ program main
         allocate(r0(3*NAtoms)); allocate(mass(NAtoms))
         do i=1,NAtoms
             read(99,*)ElementSymbol(i),ElementNumber(i),r0(3*i-2:3*i),mass(i)
-            ElementSymbol(i)=trim(adjustl(ElementSymbol(i)))
         end do
         mass=mass*AMUInAU; call StandardizeGeometry(r0,mass,NAtoms,1)
     close(99)
     cartdim=3*NAtoms
-    chartemp='Columbus7'; call DefineInternalCoordinate(chartemp,intdim)
-    allocate(q0(intdim)); q0=InternalCoordinateq(r0,intdim,cartdim)!The geometry to calculate Hessian
-!Generate loop geometries
+    inquire(file='InternalCoordinateDefinition',exist=flag)
+    if(flag) then
+        chartemp=''
+        call DefineInternalCoordinate(chartemp,intdim)
+    else
+        chartemp='Columbus7'
+        call DefineInternalCoordinate(chartemp,intdim)
+    end if
+    allocate(q0(intdim)); q0=InternalCoordinateq(r0,intdim,cartdim)
+!Generate a loop around the reference geometry
     allocate(q(intdim)); allocate(r(cartdim))
     open(unit=99,file='geom.all',status='replace')
-        do i=1,intdim!Start from q0, displace +- along each internal coordinate
-            if(GeometryTransformation_IntCDef(i).motion(1).type=='stretching') then!Bond length: 0.001A
-                q=q0; q(i)=q(i)+0.001d0*AInAU; call WriteGeom()
-                q=q0; q(i)=q(i)-0.001d0*AInAU; call WriteGeom()
-            else!Angle: 0.001
-                q=q0; q(i)=q(i)+0.001d0; call WriteGeom()
-                q=q0; q(i)=q(i)-0.001d0; call WriteGeom()
-            end if
+        !Example: start from q0, displace 1st internal coordinate
+        do i=-5,5
+            q=q0
+            q(1)=q(1)+dble(i)*0.04d0
+            call WriteGeom()
         end do
     close(99)
     contains

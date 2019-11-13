@@ -2,15 +2,20 @@
 
 To run a batch of Columbus7 single point calculation:
 1. Prepare a directory with input template, i.e. everything required for a single point calculation except geom
-2. Entre a work directory
-3. cp Path_To_Columbus7-Extension/SinglePointBatch/{GenGeom.f90,makefile} .
-4. Prepare intcfl (Columbus7 internal coordinate definition file) and geom (Columbus7 geometry file) in current directory. Modify GenGeom.f90 to generate a batch of desired geometries, make, ./GenGeom.exe (This step creates appended Columbus7 geometry file)
-5. Entre a directory with enough free disk space
-6. bash create.sh InputPath NAtoms GeomPath (This step creates directories naming from 1 to the number of geometries, which are Columbus7 single point job directories)
-7. Prepare a job script for your queuing system, then bash submit.sh JobScriptPath (This step submits the batch jobs. If some jobs fail, bash again)
+2. Prepare an appended Columbus7 geometry file
+3. Prepare a job script for your queuing system
+4. Entre a work directory
+5. bash create.sh InputPath NAtoms GeomPath
+6. bash submit.sh JobScriptPath
 
 Optionally, after not every job has finished, you may bash clean.sh to remove unnecessary files and directories for collecting
 
+Tips:
+1. create.sh creates directories naming from 1 to the number of geometries, which are Columbus7 single point job directories
+2. submit.sh submits unsubmitted job and failed job
+
 All shell scripts support -h argument to show details
 
-Dependency: my Fortran-Library, as written in makefile
+Two examples to prepare appended Columbus7 geometry file: 
+* loop.f90 shows how to generate a loop around a certain geometry
+* path.f90 shows how to generate a linear path between two geometries
