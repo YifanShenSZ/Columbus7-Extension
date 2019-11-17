@@ -1,6 +1,6 @@
 #!bin/bash
 
-# Command REPLY input
+# Command line input
 usage="Create Columbus7 single point job directories naming from 1 to the number of geometries in current directory
 
 $(basename "$0") [-h]
