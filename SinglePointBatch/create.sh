@@ -1,6 +1,6 @@
 #!bin/bash
 
-# Command line input
+# Command REPLY input
 usage="Create Columbus7 single point job directories naming from 1 to the number of geometries in current directory
 
 $(basename "$0") [-h]
@@ -27,22 +27,22 @@ done
 # Do the jub
 i=1
 count=1
-while read -r line; do
+while read; do
     if [ $count == 1 ]; then # Start a new geometry
         if [ ! -d $i ]; then
             mkdir $i
         fi
         cd $i
         cp $1/* .
-        echo "$line" > geom
+        echo "$REPLY" > geom
         count=$[count+1]
     elif [ $count == $2 ]; then # End of current geometry
-        echo "$line" >> geom
+        echo "$REPLY" >> geom
         cd ..
         i=$[i+1]
         count=1
     else # Keep working on current geometry
-        echo "$line" >> geom
+        echo "$REPLY" >> geom
         count=$[count+1]
     fi
 done < $3
