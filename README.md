@@ -42,9 +42,6 @@ The basis input daltaoin format is:
 4. H marking the head of a basis, number of alphas, number of contracted basis. Basis are sorted by l
 5. Alpha value, contraction coefficients
 
-### MCSCF
-To enforce 2nd order optimizor: set a large tol(9), and set WNORM in mcscf.in to 0 < WNORM < tol(9)
-
 ### MRCI
 #### Computation cost
 The upper limit of CI expansion on 24 core avx2 processor computer in 2019 is ~ 200,000,000
