@@ -9,7 +9,7 @@ Featured utilities:
 See each subdirectory for details
 
 ## Complement to Columbus7 documentation
-Columbus7 originates in 1980 and preserves many historical codes. Besides, the user community of Columbus7 is always small. As a result, there are compatibility issues and undiscovered bugs, which are out of the coverage of the official documentation
+Columbus7 originates in 1980s and preserves many historical codes. Besides, the user community of Columbus7 is always small. As a result, there are compatibility issues and undiscovered bugs, which are out of the coverage of the official documentation
 
 ### Installation
 Steps
@@ -42,12 +42,15 @@ The basis input daltaoin format is:
 4. H marking the head of a basis, number of alphas, number of contracted basis. Basis are sorted by l
 5. Alpha value, contraction coefficients
 
+### MCSCF
+To enforce 2nd order optimizor: set a large tol(9), and set WNORM in mcscf.in to 0 < WNORM < tol(9)
+
 ### MRCI
 #### Computation cost
 The upper limit of CI expansion on 24 core avx2 processor computer in 2019 is ~ 200,000,000
 
 #### General modification
-Tighten MCSCF tolerance in mcscfin before running MRCI:
+Tighten MCSCF tolerance in mcscfin before running MRCI, recommend:
 * energy change < tol(1)=1e-12
 * gradient (W) norm < tol(2)=1e-8
 * orbital correction (K) norm < tol(3)=1e-8
@@ -56,14 +59,14 @@ To run parallel MRCI:
 * you may have to manually change the 'ciudg' keyword in control.run to 'pciudg'
 * modify nseg in ciudgin according to WORK/ciudg.perf to speed up
 
-Tighten MRCI tolerance in ciudgin before computing gradient:
-* RTOLBK=1e-5 or 1e-6
-* RTOLCI=1e-5 or 1e-6
+Tighten MRCI tolerance in ciudgin before computing gradient, recommend:
+* RTOLBK = 1e-5 or 1e-6
+* RTOLCI = 1e-5 or 1e-6
 
 Tighten MRCI gradient tolerance in cigrdin:
-* orbital resolution < wndtol=1e-9,wnatol=1e-9,wnvtol=1e-9
-* final effective densitymatrix < ftol=1e-11
-* if using LAPACK solver (no symmetry): solvelpck=1,mdir=0,cdir=0; else Columbus solver (with symmetry): nmiter=200,nvrsmx=200,rtol=1e-10,dtol=1e-10
+* orbital resolution < wndtol = 1e-9, wnatol = 1e-9, wnvtol = 1e-9
+* final effective densitymatrix < ftol = 1e-11
+* if using LAPACK solver (no symmetry): solvelpck = 1, mdir = 0, cdir = 0; else Columbus solver (with symmetry): nmiter = 200, nvrsmx = 200, rtol = 1e-10, dtol = 1e-10
 
 #### Special skill
 * FROOT: NROOT computes the lowest NROOT MRCI roots; FROOT follows the FROOT-th MCSCF root and optimizes it with MRCI (keeping tracking by overlap), then output it along with lower MRCI states. FROOT is better at giving the state you want, but may fail when MRCI has different state ordering from MCSCF
