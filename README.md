@@ -42,6 +42,11 @@ The basis input daltaoin format is:
 4. H marking the head of a basis, number of alphas, number of contracted basis. Basis are sorted by l
 5. Alpha value, contraction coefficients
 
+### MCSCF
+MCSCF is a nonlinear optimization problem, so may easily be trapped into local minimum. Symptoms are:
+* For symmetric molecule, molecular orbital may lose symmetry if not explicitly using symmetry
+* With converged molecular orbital as initial guess, result may differ after rotating the molecule
+
 ### MRCI
 #### Computation cost
 The upper limit of CI expansion on 24 core avx2 processor computer in 2019 is ~ 200,000,000
