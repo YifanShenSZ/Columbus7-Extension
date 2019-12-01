@@ -81,6 +81,9 @@ Tighten MRCI gradient tolerance in cigrdin:
 * By default GDIIS searches for minimum with BFGS. To search for saddle point, replace bfgs at the last line in gdiisin with sadd
 
 ### Weird stuff
+Bug
+* ifort 2018.3 with avx2 leads to bug in mcscf.x
+
 Orbital
 * The number of each kind of orbitals appearing in cidrtin cannot exceed 256, including the frozen orbitals
 
