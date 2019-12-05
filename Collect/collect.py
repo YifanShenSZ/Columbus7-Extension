@@ -33,7 +33,7 @@ def SingleState(args: argparse.Namespace):
     cartgrad=numpy.empty((args.NDirectory,NAtoms,3))
     if args.intgrad: intgrad=numpy.empty((args.NDirectory,intdim))
     # Read energy and gradient
-    for i in range(args.NDirecotry):
+    for i in range(args.NDirectory):
         # energy
         with open(args.BatchPath/str(i+1)/'LISTINGS'/'ciudgsm.sp','r') as f: lines=f.readlines()
         for j in range(len(lines)):
@@ -49,13 +49,13 @@ def SingleState(args: argparse.Namespace):
             for j in range(intdim): intgrad[i,j]=float(lines[j])
     # Output
     with open('energy.all','w'): # energy
-        for i in range(args.NDirecotry): print(energy[i],file=f)
+        for i in range(args.NDirectory): print(energy[i],file=f)
     with open('cartgrd.drt1.state'+str(args.NState)+'.all','w'): # gradient
-        for i in range(args.NDirecotry):
+        for i in range(args.NDirectory):
             for j in range(NAtoms): print(cartgrad[i,j,0],cartgrad[i,j,1],cartgrad[i,j,2],sep=' ',file=f)
     if args.intgrad: # internal coordinate gradient
         with open('intgrd.drt1.state'+str(args.NState)+'.all','w'):
-            for i in range(args.NDirecotry):
+            for i in range(args.NDirectory):
                 for j in range(intdim): print(intgrad[i,j],file=f)
 
 def MultiState(args: argparse.Namespace):
@@ -64,7 +64,7 @@ def MultiState(args: argparse.Namespace):
     cartgrad=numpy.empty((args.NDirectory,args.NState,args.NState,NAtoms,3))
     if args.intgrad: intgrad=numpy.empty((args.NDirectory,args.NState,args.NState,intdim))
     # Read energy and gradient
-    for i in range(args.NDirecotry):
+    for i in range(args.NDirectory):
         # energy
         with open(args.BatchPath/str(i+1)/'LISTINGS'/'ciudgsm.sp','r') as f: lines=f.readlines()
         for j in range(len(lines)):
@@ -92,39 +92,39 @@ def MultiState(args: argparse.Namespace):
                     for j in range(intdim): intgrad[i,istate,jstate,j]=float(lines[j])
     # Output
     with open('energy.all','w'): # energy
-        for i in range(args.NDirecotry):
+        for i in range(args.NDirectory):
             for j in range(args.NState-1): print(energy[i,j],end=' ',file=f)
             print(energy[i,args.NState-1],file=f)
     for istate in range(args.NState): # gradient
         with open('cartgrd.drt1.state'+str(istate+1)+'.all','w'):
-            for i in range(args.NDirecotry):
+            for i in range(args.NDirectory):
                 for j in range(NAtoms): print(cartgrad[i,istate,istate,j,0],cartgrad[i,istate,istate,j,1],cartgrad[i,istate,istate,j,2],sep=' ',file=f)
         for jstate in range(istate+1,args.NState):
             with open('cartgrd.nad.drt1.state'+str(istate+1)+'.drt1.state'+str(jstate+1)+'.all','w'):
-                for i in range(args.NDirecotry):
+                for i in range(args.NDirectory):
                     cartgrad[i,istate,jstate,:,:]=cartgrad[i,istate,jstate,:,:]*(energy[i,jstate]-energy[i,istate])
                     for j in range(NAtoms): print(cartgrad[i,istate,jstate,j,0],cartgrad[i,istate,jstate,j,1],cartgrad[i,istate,jstate,j,2],sep=' ',file=f)
     if args.intgrad: # internal coordinate gradient
         for istate in range(args.NState):
             with open('intgrd.drt1.state'+str(istate+1)+'.all','w'):
-                for i in range(args.NDirecotry):
+                for i in range(args.NDirectory):
                     for j in range(intdim): print(intgrad[i,istate,istate,j],file=f)
             for jstate in range(istate+1,args.NState):
                 with open('intgrd.nad.drt1.state'+str(istate+1)+'.drt1.state'+str(jstate+1)+'.all','w'):
-                    for i in range(args.NDirecotry):
+                    for i in range(args.NDirectory):
                         intgrad[i,istate,jstate,:,:]=intgrad[i,istate,jstate,:,:]*(energy[i,jstate]-energy[i,istate])
                         for j in range(intdim): print(intgrad[i,istate,jstate,j],file=f)
 
 def mcscf(args: argparse.Namespace):
     energy=numpy.empty((args.NDirectory,args.NState)) # Allocate memory
-    for i in range(args.NDirecotry): # Read energy
+    for i in range(args.NDirectory): # Read energy
         with open(args.BatchPath/str(i+1)/'LISTINGS'/'mcscfsm.sp','r') as f: lines=f.readlines()
         for j in range(len(lines)):
             if 'Individual total energies for all states' in lines[j]: break
         for k in range(args.NState):
             energy[i,k]=float(lines[j+k+1][42:61].strip())
     with open('energy.all','w'): # Output
-        for i in range(args.NDirecotry):
+        for i in range(args.NDirectory):
             for j in range(args.NState-1): print(energy[i,j],end='\t',file=f)
             print(energy[i,args.NState-1],file=f)
 
