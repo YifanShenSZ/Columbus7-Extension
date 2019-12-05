@@ -8,7 +8,7 @@ $(basename "$0") [-h]
 optional arguments:
   -h             show this help message and exit"
 
-while getopts ':h:' option; do
+while getopts ':hs:' option; do
   case "$option" in
     h) echo "$usage"
        exit;;
