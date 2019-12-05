@@ -3,7 +3,7 @@
 # Command line input
 usage="Submit new Columbus7 job or resubmit failed job in current directory
 
-$(basename "$0") [-h] [-s n]
+$(basename "$0") [-h] [-q n]
                  JobScriptPath
 
 positional arguments:
@@ -11,14 +11,14 @@ positional arguments:
 
 optional arguments:
   -h             show this help message and exit
-  -s             queuing system (default = slurm)"
+  -q             queuing system (default = slurm)"
 
 queue='slurm' # We will read the queuing system log to determine whether a job is failed
-while getopts ':hs:' option; do
+while getopts ':hq:' option; do
   case "$option" in
     h) echo "$usage"
        exit;;
-    s) queue=$OPTARG;;
+    q) queue=$OPTARG;;
     :) printf "missing argument for -%s\n" "$OPTARG" >&2
        echo "$usage" >&2
        exit;;
