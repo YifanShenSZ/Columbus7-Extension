@@ -2,9 +2,10 @@
 Useful extension and modification for Columbus7
 
 Featured utilities:
-1. Run a batch of Columbus7 single point calculation (SinglePointBatch)
-2. Collect the batch (Collect)
-3. Calculate Hessian and vibration (Hessian), and provide scan along each normal mode
+* Various modifications to improve compatibility and functionality (Modification)
+* Run a batch of Columbus7 single point calculation (SinglePointBatch)
+* Collect the batch (Collect)
+* Calculate Hessian and vibration (Hessian)
 
 See each subdirectory for details
 
@@ -43,9 +44,8 @@ The basis input daltaoin format is:
 5. Alpha value, contraction coefficients
 
 ### MCSCF
-MCSCF is a nonlinear optimization problem, so may easily be trapped into local minimum. Symptoms are:
+MCSCF is a nonlinear optimization problem, so may easily be trapped into local minimum, e.g.:
 * For symmetric molecule, molecular orbital may lose symmetry if not explicitly using symmetry
-* With converged molecular orbital as initial guess, result may differ after rotating the molecule
 
 ### MRCI
 #### Computation cost

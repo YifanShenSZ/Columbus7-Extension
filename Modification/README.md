@@ -7,5 +7,6 @@ Installation
 * Default $COLUMBUS/machine.cfg/linux64.ifc.byterecl is fine but may not be optimal. Here are my favourites
 
 Utilities
-* For minimum energy crossing point search, replace $COLUMBUS/polyhess.x
-* For special Rydberg basis, add Rydberg.bas to $COLUMBUS/source/iargos/basis
+* For special Rydberg basis, add Rydberg.bas to $COLUMBUS/source/iargos/basis after installation
+* To tune ao-mo integral cutoff threshold, replace $COLUMBUS/source/mcscf/mcscf2.f before installation
+* For minimum energy crossing point search, replace $COLUMBUS/polyhess.x after installation
