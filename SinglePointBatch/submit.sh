@@ -29,6 +29,7 @@ while getopts ':hq:' option; do
 done
 shift $((OPTIND - 1))
 
+JobScriptAbsPath=$(realpath $1)
 JobScript=$(basename $1)
 
 # Do the job
@@ -37,7 +38,7 @@ for entry in * ; do
         cd $entry
         if [ -f 'geom' ]; then # This is a job directory
             if [ ! -f 'runc.log' ]; then # This is a new job
-                cp $1 .
+                cp $JobScriptAbsPath .
                 sbatch $JobScript
             else # This job has started
                 success=`cat runc.log |grep timings`
