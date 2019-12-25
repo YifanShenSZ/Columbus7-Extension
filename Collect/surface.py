@@ -15,7 +15,8 @@ def parse_args() -> argparse.Namespace: # Command line input
     args = parser.parse_args()
     return args
 
-def main():
+if __name__ == "__main__":
+    args = parse_args()
     # Read energy
     with open(args.DataPath,'r') as f: data=f.readlines()
     n=len(data); NState=len(data[0].split())
@@ -29,6 +30,3 @@ def main():
     for i in range(NState):
         plt.scatter(x,e[i,:])
     plt.show()
-
-if __name__ == "__main__":
-    main()

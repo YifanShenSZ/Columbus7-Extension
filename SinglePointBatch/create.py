@@ -16,7 +16,7 @@ def parse_args() -> argparse.Namespace: # Command line input
     args = parser.parse_args()
     return args
 
-def main():
+if __name__ == "__main__":
     # Initialize
     args = parse_args()
     with open(args.GeomPath,'r') as f: geoms = f.readlines()
@@ -31,6 +31,3 @@ def main():
             for j in range(args.NAtoms):
                 print(geoms[line],end='',file=f) # geoms[line] already ends with \n
                 line=line+1
-
-if __name__ == "__main__":
-    main()

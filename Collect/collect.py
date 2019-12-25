@@ -129,14 +129,14 @@ def mcscf(args: argparse.Namespace):
             for j in range(args.NState-1): print(energy[i,j],end='\t',file=f)
             print(energy[i,args.NState-1],file=f)
 
-def main():
+if __name__ == "__main__":
     # Initialize
     args = parse_args()
-    NData = args.EndDirectory - args.StartDirectory
-    with open(args.BatchPath/'1'/'geom','r') as f: # Get NAtoms
+    NData = args.EndDirectory - args.StartDirectory + 1
+    with open(args.BatchPath/str(args.StartDirectory)/'geom','r') as f: # Get NAtoms
         NAtoms=len(f.readlines())
     if args.intgrad: # Get intdim
-        with open(args.BatchPath/'1'/'GRADIENTS'/'intgrd.drt1.state'+str(args.NState)+'.sp','r') as f:
+        with open(args.BatchPath/str(args.StartDirectory)/'GRADIENTS'/'intgrd.drt1.state'+str(args.NState)+'.sp','r') as f:
             intdim=len(f.readlines())
     # Do the job
     if args.mcscf:
@@ -145,6 +145,3 @@ def main():
         SingleState(args)
     else:
         MultiState(args)
-
-if __name__ == "__main__":
-    main()
