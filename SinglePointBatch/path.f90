@@ -13,7 +13,7 @@ program main
 !Molecule information
     integer::NAtoms,intdim,cartdim
     character*2,allocatable,dimension(:)::ElementSymbol
-    real*8,allocatable,dimension(:)::ElementNumber,mass,r1,q1,r2,q2
+    real*8,allocatable,dimension(:)::ElementNumber,mass,r1,r2,q1,q2
 !Work variable
     character*32::chartemp; logical::flag; integer::i,j
     real*8::dbletemp,dbletemp1
@@ -36,34 +36,34 @@ program main
         end do
         mass=mass*AMUInAU
     close(99)
-    cartdim=3*NAtoms
-    allocate(r(cartdim)); r=r1; call StandardizeGeometry(r1,mass,NAtoms,1,reference=r)
-    allocate(q1(intdim)); q1=InternalCoordinateq(r1,intdim,cartdim)
     open(unit=99,file='geom2',status='old')!Read geometry 2
-        allocate(r2(cartdim))
+        allocate(r2(3*NAtoms))
         do i=1,NAtoms
             read(99,*)chartemp,dbletemp,r2(3*i-2:3*i),dbletemp1
         end do
     close(99)
-    allocate(q2(intdim)); q2=InternalCoordinateq(r2,intdim,cartdim)
     inquire(file='NStep',exist=flag)
     if(flag) then
         open(unit=99,file='NStep',status='old'); read(99,*)NStep; close(99)
     end if
+    cartdim=3*NAtoms
+    allocate(q1(intdim)); q1=InternalCoordinateq(r1,intdim,cartdim)
+    allocate(q2(intdim)); q2=InternalCoordinateq(r2,intdim,cartdim)
 !Generate a linear path from geometry 1 to geometry 2
+    chartemp='assimilate'
     allocate(q(intdim))
     allocate(dq(intdim)); dq=(q2-q1)/dble(NStep+1)
     allocate(rsave(cartdim))
     open(unit=99,file='geom.all',status='replace')
             q=q1+dq
-            r=CartesianCoordinater(q,cartdim,intdim,mass=mass,r0=r1)
+            r=CartesianCoordinater(q,cartdim,intdim,uniquify=chartemp,mass=mass,r0=r1)
             do j=1,NAtoms
                 write(99,'(1x,A2,2x,F5.1,4F14.8)')ElementSymbol(j),ElementNumber(j),r(3*j-2:3*j),mass(j)/AMUInAU
             end do
             rsave=r
         do i=2,NStep
             q=q1+dq*dble(i)
-            r=CartesianCoordinater(q,cartdim,intdim,mass=mass,r0=rsave)
+            r=CartesianCoordinater(q,cartdim,intdim,uniquify=chartemp,mass=mass,r0=rsave)
             do j=1,NAtoms
                 write(99,'(1x,A2,2x,F5.1,4F14.8)')ElementSymbol(j),ElementNumber(j),r(3*j-2:3*j),mass(j)/AMUInAU
             end do
