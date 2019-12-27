@@ -23,7 +23,7 @@ def parse_args() -> argparse.Namespace: # Command line input
     parser.add_argument('EndDirectory',type=int,help='StartDirectory to EndDirectory')
     parser.add_argument('NState',type=int,help='collect from state 1 to NState')
     parser.add_argument('-s','--single', action='store_true',help='only collect NState-th state')
-    parser.add_argument('-e','--energy' ,action='store_true',help='only collect energy'
+    parser.add_argument('-e','--energy' ,action='store_true',help='only collect energy')
     parser.add_argument('-i','--intgrad',action='store_true',help='additionally collect internal coordinate gradient')
     parser.add_argument('-m','--mcscf',  action='store_true',help='collect MCSCF result rather than MRCI')
     args = parser.parse_args()
