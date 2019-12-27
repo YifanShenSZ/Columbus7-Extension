@@ -39,14 +39,14 @@ def SingleState(args: argparse.Namespace):
         with open(args.BatchPath/str(i)/'LISTINGS'/'ciudgsm.sp','r') as f: lines=f.readlines()
         for j in range(len(lines)):
             if 'mr-sdci  convergence criteria satisfied' in lines[j]: break
-        temp=lines[j+2+args.NState].split(); energy[i]=float(temp[len(temp)-5])
+        temp=lines[j+2+args.NState].split(); energy[i]=float(temp[len(temp)-5].replace('D','e'))
         # gradient
-        with open(args.BatchPath/str(i)/'GRADIENTS'/'cartgrd.drt1.state'+str(args.NState)+'.sp','r') as f: lines=f.readlines()
+        with open(args.BatchPath/str(i)/'GRADIENTS'/('cartgrd.drt1.state'+str(args.NState)+'.sp'),'r') as f: lines=f.readlines()
         for j in range(NAtoms):
             temp=lines[j].split()
-            for k in range(3): cartgrad[i,j,k]=float(temp[k])
+            for k in range(3): cartgrad[i,j,k]=float(temp[k].replace('D','e'))
         if args.intgrad: # internal coordinate gradient
-            with open(args.BatchPath/str(i)/'GRADIENTS'/'intgrd.drt1.state'+str(args.NState)+'.sp','r') as f: lines=f.readlines()
+            with open(args.BatchPath/str(i)/'GRADIENTS'/('intgrd.drt1.state'+str(args.NState)+'.sp'),'r') as f: lines=f.readlines()
             for j in range(intdim): intgrad[i,j]=float(lines[j])
     # Output
     with open('energy.all','w') as f: # energy
@@ -72,24 +72,24 @@ def MultiState(args: argparse.Namespace):
             if 'mr-sdci  convergence criteria satisfied' in lines[j]: break
         for k in range(args.NState):
             temp=lines[j+2+k+1].split()
-            energy[i,k]=float(temp[len(temp)-5])
+            energy[i,k]=float(temp[len(temp)-5].replace('D','e'))
         # gradient
         for istate in range(args.NState):
-            with open(args.BatchPath/str(i)/'GRADIENTS'/'cartgrd.drt1.state'+str(istate+1)+'.sp','r') as f: lines=f.readlines()
+            with open(args.BatchPath/str(i)/'GRADIENTS'/('cartgrd.drt1.state'+str(istate+1)+'.sp'),'r') as f: lines=f.readlines()
             for j in range(NAtoms):
                 temp=lines[j].split()
-                for k in range(3): cartgrad[i,istate,istate,j,k]=float(temp[k])
+                for k in range(3): cartgrad[i,istate,istate,j,k]=float(temp[k].replace('D','e'))
             for jstate in range(istate+1,args.NState):
-                with open(args.BatchPath/str(i)/'GRADIENTS'/'cartgrd.nad.drt1.state'+str(istate+1)+'.drt1.state'+str(jstate+1)+'.sp','r') as f: lines=f.readlines()
+                with open(args.BatchPath/str(i)/'GRADIENTS'/('cartgrd.nad.drt1.state'+str(istate+1)+'.drt1.state'+str(jstate+1)+'.sp'),'r') as f: lines=f.readlines()
                 for j in range(NAtoms):
                     temp=lines[j].split()
-                    for k in range(3): cartgrad[i,istate,jstate,j,k]=float(temp[k])
+                    for k in range(3): cartgrad[i,istate,jstate,j,k]=float(temp[k].replace('D','e'))
         if args.intgrad: # internal coordinate gradient
             for istate in range(args.NState):
-                with open(args.BatchPath/str(i)/'GRADIENTS'/'intgrd.drt1.state'+str(istate+1)+'.sp','r') as f: lines=f.readlines()
+                with open(args.BatchPath/str(i)/'GRADIENTS'/('intgrd.drt1.state'+str(istate+1)+'.sp'),'r') as f: lines=f.readlines()
                 for j in range(intdim): intgrad[i,istate,istate,j]=float(lines[j])
                 for jstate in range(istate+1,args.NState):
-                    with open(args.BatchPath/str(i)/'GRADIENTS'/'intgrd.nad.drt1.state'+str(istate+1)+'.drt1.state'+str(jstate+1)+'.sp','r') as f: lines=f.readlines()
+                    with open(args.BatchPath/str(i)/'GRADIENTS'/('intgrd.nad.drt1.state'+str(istate+1)+'.drt1.state'+str(jstate+1)+'.sp'),'r') as f: lines=f.readlines()
                     for j in range(intdim): intgrad[i,istate,jstate,j]=float(lines[j])
     # Output
     with open('energy.all','w') as f: # energy
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     with open(args.BatchPath/str(args.StartDirectory)/'geom','r') as f: # Get NAtoms
         NAtoms=len(f.readlines())
     if args.intgrad: # Get intdim
-        with open(args.BatchPath/str(args.StartDirectory)/'GRADIENTS'/'intgrd.drt1.state'+str(args.NState)+'.sp','r') as f:
+        with open(args.BatchPath/str(args.StartDirectory)/'GRADIENTS'/('intgrd.drt1.state'+str(args.NState)+'.sp'),'r') as f:
             intdim=len(f.readlines())
     # Do the job
     if args.mcscf:
