@@ -43,9 +43,9 @@ for entry in * ; do
             else # This job has started
                 success=`cat runc.log |grep timings`
                 if [ ! -n "$success" ]; then # This job has not yet succeeded
-                    error=`cat runc.log |grep 'Error occured!'`
+                    error=`cat runc.error |wc -l`
                     timeout=`cat ${queue}* |grep TIMEOUT`
-                    if [ -n "${error}${timeout}" ]; then # This job has failed
+                    if [ $error != 1 ] || [ -n "${timeout}" ]; then # This job has failed
                         echo 'Failed job '$entry
                         if [ -d WORK ]; then # Remove Columbus7 scratch
                             rm -r WORK
