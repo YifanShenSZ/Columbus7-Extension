@@ -33,16 +33,16 @@ program main
         mass=mass*AMUInAU
     close(99)
     cartdim=3*NAtoms
-    allocate(r(cartdim)); r=r0; call StandardizeGeometry(r0,mass,NAtoms,1,reference=r)
     allocate(q0(intdim)); q0=InternalCoordinateq(r0,intdim,cartdim)
 !Generate a loop around the reference geometry
-    allocate(q(intdim))
+    chartemp='assimilate'
+    allocate(q(intdim)); allocate(r(cartdim))
     open(unit=99,file='geom.all',status='replace')
         !Example: start from q0, displace 1st internal coordinate
         do i=-5,5
             q=q0
             q(1)=q(1)+dble(i)*0.01d0
-            r=CartesianCoordinater(q,cartdim,intdim,mass=mass,r0=r0)
+            r=CartesianCoordinater(q,cartdim,intdim,uniquify=chartemp,mass=mass,r0=r0)
             do j=1,NAtoms
                 write(99,'(1x,A2,2x,F5.1,4F14.8)')ElementSymbol(j),ElementNumber(j),r(3*j-2:3*j),mass(j)/AMUInAU
             end do
