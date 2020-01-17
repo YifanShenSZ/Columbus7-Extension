@@ -40,6 +40,10 @@ if __name__ == "__main__":
     for istate in range(args.NState):
         for idim in range(intdim):
             hessian[istate,idim,:]=(intgrad[idim,1,istate,:]-intgrad[idim,0,istate,:])/(displ[idim,1]-displ[idim,0])
+    for i in range(intdim): # Symmetrize
+        for j in range(i+1,intdim):
+            hessian[:,i,j]=(hessian[:,i,j]+hessian[:,j,i])/2.0
+            hessian[:,j,i]= hessian[:,i,j]
     # Output hessian
     for istate in range(args.NState):
         with open(listings/('hessian'+str(istate+1)),'w') as f:
