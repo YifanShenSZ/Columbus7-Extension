@@ -53,6 +53,7 @@ program main
     chartemp='assimilate'
     allocate(q(intdim))
     allocate(dq(intdim)); dq=(q2-q1)/dble(NStep+1)
+    allocate(r(intdim))
     allocate(rsave(cartdim))
     open(unit=99,file='geom.all',status='replace')
             q=q1+dq
