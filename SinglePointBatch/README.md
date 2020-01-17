@@ -16,7 +16,7 @@ Tips:
 1. create.py creates directories naming from 0 to the number of geometries - 1, which are single point job directories
 2. submit.sh submits unsubmitted job and failed job
 
-All shell scripts support -h argument to show details
+All scripts support -h argument to show details
 
 Two examples to prepare appended geometry file: 
 * loop.f90 shows how to generate a loop around a certain geometry

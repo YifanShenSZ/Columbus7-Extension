@@ -43,6 +43,7 @@ for entry in * ; do
             else # This job has started
                 success=`cat runc.log |grep timings`
                 if [ ! -n "$success" ]; then # This job has not yet succeeded
+                    echo 'Unfinished job '$entry
                     error=`cat runc.log |grep 'Error occured!'`
                     timeout=`cat ${queue}* |grep TIMEOUT`
                     if [ -n "${error}${timeout}" ]; then # This job has failed
