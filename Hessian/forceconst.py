@@ -46,8 +46,8 @@ if __name__ == "__main__":
             for i in range(intdim):
                 for j in range(0,intdim,8):
                     jstart=j
-                    jstop=j+8-1
-                    if jstop>=intdim: jstop=intdim-1
+                    jstop=j+8
+                    if jstop>intdim: jstop=intdim
                     for jj in range(jstart,jstop):
                         print('%13.6f' % hessian[istate,i,jj],end='',file=f)
                     print(file=f)
