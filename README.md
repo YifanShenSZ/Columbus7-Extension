@@ -96,6 +96,6 @@ Orbital
 * The number of each kind of orbitals appearing in cidrtin cannot exceed 256, including the frozen orbitals
 
 Gradient
-* If specifying 'cigrad' in control.run, then gdiisin is required
-* Actually, sometimes 'cigrad' would fail even if executed with 'gdiis'
+* If specifying 'cigrad' in control.run, then runc assumes geometry optimization job, so gdiisin is required
+* If specifying 'cigrad' in control.run, then cigrdin cannot contain 'nadcalc'
 * If specifying 'nadcoupl' in control.run, then sometimes calculating only energy gradients without nonadiabatic couplings would make cigrd.x raise inconsistent-energy error
