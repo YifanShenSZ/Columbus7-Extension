@@ -48,6 +48,15 @@ program main
         end do
     close(99)
 !Do the job
+    !The internal coordinate and vibration routines of Columbus use weird unit:
+    !    energy in 10^-18 J, length in A (to be continued)
+    H=H/4.35974417d0! 1 Hatree = 4.35974417 * 10^-18 J
+    do i=1,intdim
+        if(GeometryTransformation_IntCDef(i).motion(1).type=='stretching') then
+            H(:,i)=H(:,i)/AInAU
+            H(i,:)=H(i,:)/AInAU
+        end if
+    end do
     !Get B matrix
     cartdim=3*NAtoms
     allocate(q(intdim)); allocate(B(intdim,cartdim))
