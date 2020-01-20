@@ -154,7 +154,7 @@ def MultiState(args: argparse.Namespace):
                 for jstate in range(istate+1,args.NState):
                     with open('intgrd.nad.drt1.state'+str(istate+1)+'.drt1.state'+str(jstate+1)+'.all','w') as f:
                         for i in range(NData):
-                            intgrad[i,istate,jstate,:,:]=intgrad[i,istate,jstate,:,:]*(energy[i,jstate]-energy[i,istate])
+                            intgrad[i,istate,jstate,:]=intgrad[i,istate,jstate,:]*(energy[i,jstate]-energy[i,istate])
                             for j in range(intdim): print(intgrad[i,istate,jstate,j],file=f)
 
 def mcscf(args: argparse.Namespace):
