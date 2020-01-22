@@ -5,6 +5,7 @@ This is a finite difference calculation from gradients
 Note that Columbus internal coordinate routines use weird unit:
     energy in 10^-18 J, length in A (to be continued)
 Optionally, additionally collect geometry, MRCI energy, gradient, transition dipole
+Please note that interstate coupling replaces nonadiabatic coupling
 """
 
 ''' Library '''
@@ -61,10 +62,10 @@ def collect(args: argparse.Namespace):
     geom=[]
     ref_energy  =numpy.empty( args.NState)
     ref_cartgrad=numpy.empty((args.NState,args.NState,NAtoms,3))
-    ref_intgrad =numpy.empty((args.NState,args.NState,intdim))
+    ref_dipole  =numpy.empty((args.NState,args.NState,3))
     energy  =numpy.empty((intdim,2,args.NState))
     cartgrad=numpy.empty((intdim,2,args.NState,args.NState,NAtoms,3))
-    intgrad =numpy.empty((intdim,2,args.NState,args.NState,intdim))
+    dipole  =numpy.empty((intdim,2,args.NState,args.NState,3))
     # Read
     ## REFPOINT
     current=Path(args.DISPLACEMENTPath/'REFPOINT')
@@ -80,7 +81,7 @@ def collect(args: argparse.Namespace):
         for k in range(args.NState):
             temp=lines[j+2+k+1].split()
             ref_energy[k]=float(temp[len(temp)-5].replace('D','e'))
-        ### gradient
+        # gradient
         for istate in range(args.NState):
             with open(current/'GRADIENTS'/('cartgrd.drt1.state'+str(istate+1)+'.sp'),'r') as f: lines=f.readlines()
             for j in range(NAtoms):
@@ -91,6 +92,16 @@ def collect(args: argparse.Namespace):
                 for j in range(NAtoms):
                     temp=lines[j].split()
                     for k in range(3): ref_cartgrad[istate,jstate,j,k]=float(temp[k].replace('D','e'))
+        # transition dipole
+        for istate in range(args.NState):
+            for jstate in range(istate+1,args.NState):
+                with open(current/'LISTINGS'/('trncils.FROMdrt1.state'+str(istate+1)+'TOdrt1.state'+str(jstate+1)),'r') as f: lines=f.readlines()
+                for j in range(len(lines)):
+                    if 'Transition moment components' in lines[j]: break
+                temp=lines[j+6].split()
+                ref_dipole[istate,jstate,0]=float(temp[2].replace('D','e'))
+                ref_dipole[istate,jstate,1]=float(temp[3].replace('D','e'))
+                ref_dipole[istate,jstate,2]=float(temp[4].replace('D','e'))
     ## Displacement points
     for i in range(intdim):
         for ii in range(2):
@@ -118,6 +129,16 @@ def collect(args: argparse.Namespace):
                         for j in range(NAtoms):
                             temp=lines[j].split()
                             for k in range(3): cartgrad[i,ii,istate,jstate,j,k]=float(temp[k].replace('D','e'))
+                # transition dipole
+                for istate in range(args.NState):
+                    for jstate in range(istate+1,args.NState):
+                        with open(current/'LISTINGS'/('trncils.FROMdrt1.state'+str(istate+1)+'TOdrt1.state'+str(jstate+1)),'r') as f: lines=f.readlines()
+                        for j in range(len(lines)):
+                            if 'Transition moment components' in lines[j]: break
+                        temp=lines[j+6].split()
+                        dipole[i,ii,istate,jstate,0]=float(temp[2].replace('D','e'))
+                        dipole[i,ii,istate,jstate,1]=float(temp[3].replace('D','e'))
+                        dipole[i,ii,istate,jstate,2]=float(temp[4].replace('D','e'))
     # Output
     with open(listings/'geom.all','w') as f: # geometry
         for i in range(len(geom)):
@@ -150,6 +171,15 @@ def collect(args: argparse.Namespace):
                     for ii in range(2):
                         cartgrad[i,ii,istate,jstate,:,:]=cartgrad[i,ii,istate,jstate,:,:]*(energy[i,ii,jstate]-energy[i,ii,istate])
                         for j in range(NAtoms): print(cartgrad[i,ii,istate,jstate,j,0],cartgrad[i,ii,istate,jstate,j,1],cartgrad[i,ii,istate,jstate,j,2],sep=' ',file=f)
+    for istate in range(args.NState): # transition dipole
+        for jstate in range(istate+1,args.NState):
+            with open(listings/('trncils.FROMdrt1.state'+str(istate+1)+'TOdrt1.state'+str(jstate+1)+'.all'),'w') as f:
+                # REFPOINT
+                print(ref_dipole[istate,jstate,0],ref_dipole[istate,jstate,1],ref_dipole[istate,jstate,2],sep=' ',file=f)
+                # Displacement points
+                for i in range(intdim):
+                    for ii in range(2):
+                        print(dipole[i,ii,istate,jstate,0],dipole[i,ii,istate,jstate,1],dipole[i,ii,istate,jstate,2],sep=' ',file=f)
 
 if __name__ == "__main__":
     # Initialize
