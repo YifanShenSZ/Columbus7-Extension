@@ -140,46 +140,46 @@ def collect(args: argparse.Namespace):
                         dipole[i,ii,istate,jstate,1]=float(temp[3].replace('D','e'))
                         dipole[i,ii,istate,jstate,2]=float(temp[4].replace('D','e'))
     # Output
-    with open(listings/'geom.all','w') as f: # geometry
+    with open(listings/'geom.data','w') as f: # geometry
         for i in range(len(geom)):
             for j in range(len(geom[i])):
-                print(geom[i][j],end='',file=f)
-    with open(listings/'energy.all','w') as f: # energy
+                print(geom[i][j][:2],geom[i][j][10:52],sep='',end='\n',file=f)
+    with open(listings/'energy.data','w') as f: # energy
         # REFPOINT
-        for j in range(args.NState-1): print(ref_energy[j],end=' ',file=f)
-        print(ref_energy[args.NState-1],file=f)
+        for j in range(args.NState-1): print('%25.15E'%ref_energy[j],end='',file=f)
+        print('%25.15E'%ref_energy[args.NState-1],file=f)
         # Displacement points
         for i in range(intdim):
             for ii in range(2):
-                for j in range(args.NState-1): print(energy[i,ii,j],end=' ',file=f)
-                print(energy[i,ii,args.NState-1],file=f)
+                for j in range(args.NState-1): print('%25.15E'%energy[i,ii,j],end=' ',file=f)
+                print('%25.15E'%energy[i,ii,args.NState-1],file=f)
     for istate in range(args.NState): # gradient
-        with open(listings/('cartgrd.drt1.state'+str(istate+1)+'.all'),'w') as f:
+        with open(listings/('cartgrad-'+str(istate+1)+'.data'),'w') as f:
             # REFPOINT
-            for j in range(NAtoms): print(ref_cartgrad[istate,istate,j,0],ref_cartgrad[istate,istate,j,1],ref_cartgrad[istate,istate,j,2],sep=' ',file=f)
+            for j in range(NAtoms): print('%25.15E%25.15E%25.15E'%(ref_cartgrad[istate,istate,j,0],ref_cartgrad[istate,istate,j,1],ref_cartgrad[istate,istate,j,2]),file=f)
             # Displacement points
             for i in range(intdim):
                 for ii in range(2):
-                    for j in range(NAtoms): print(cartgrad[i,ii,istate,istate,j,0],cartgrad[i,ii,istate,istate,j,1],cartgrad[i,ii,istate,istate,j,2],sep=' ',file=f)
+                    for j in range(NAtoms): print('%25.15E%25.15E%25.15E'%(cartgrad[i,ii,istate,istate,j,0],cartgrad[i,ii,istate,istate,j,1],cartgrad[i,ii,istate,istate,j,2]),file=f)
         for jstate in range(istate+1,args.NState):
-            with open(listings/('cartgrd.nad.drt1.state'+str(istate+1)+'.drt1.state'+str(jstate+1)+'.all'),'w') as f:
+            with open(listings/('cartgrad-'+str(istate+1)+'-'+str(jstate+1)+'.data'),'w') as f:
                 # REFPOINT
                 ref_cartgrad[istate,jstate,:,:]=ref_cartgrad[istate,jstate,:,:]*(ref_energy[jstate]-ref_energy[istate])
-                for j in range(NAtoms): print(ref_cartgrad[istate,jstate,j,0],ref_cartgrad[istate,jstate,j,1],ref_cartgrad[istate,jstate,j,2],sep=' ',file=f)
+                for j in range(NAtoms): print('%25.15E%25.15E%25.15E'%(ref_cartgrad[istate,jstate,j,0],ref_cartgrad[istate,jstate,j,1],ref_cartgrad[istate,jstate,j,2]),file=f)
                 # Displacement points
                 for i in range(intdim):
                     for ii in range(2):
                         cartgrad[i,ii,istate,jstate,:,:]=cartgrad[i,ii,istate,jstate,:,:]*(energy[i,ii,jstate]-energy[i,ii,istate])
-                        for j in range(NAtoms): print(cartgrad[i,ii,istate,jstate,j,0],cartgrad[i,ii,istate,jstate,j,1],cartgrad[i,ii,istate,jstate,j,2],sep=' ',file=f)
+                        for j in range(NAtoms): print('%25.15E%25.15E%25.15E'%(cartgrad[i,ii,istate,jstate,j,0],cartgrad[i,ii,istate,jstate,j,1],cartgrad[i,ii,istate,jstate,j,2]),file=f)
     for istate in range(args.NState): # transition dipole
         for jstate in range(istate+1,args.NState):
-            with open(listings/('trncils.FROMdrt1.state'+str(istate+1)+'TOdrt1.state'+str(jstate+1)+'.all'),'w') as f:
+            with open(listings/('transdip-'+str(istate+1)+'-'+str(jstate+1)+'.data'),'w') as f:
                 # REFPOINT
-                print(ref_dipole[istate,jstate,0],ref_dipole[istate,jstate,1],ref_dipole[istate,jstate,2],sep=' ',file=f)
+                print('%25.15E%25.15E%25.15E'%(ref_dipole[istate,jstate,0],ref_dipole[istate,jstate,1],ref_dipole[istate,jstate,2]),file=f)
                 # Displacement points
                 for i in range(intdim):
                     for ii in range(2):
-                        print(dipole[i,ii,istate,jstate,0],dipole[i,ii,istate,jstate,1],dipole[i,ii,istate,jstate,2],sep=' ',file=f)
+                        print('%25.15E%25.15E%25.15E'%(dipole[i,ii,istate,jstate,0],dipole[i,ii,istate,jstate,1],dipole[i,ii,istate,jstate,2]),file=f)
 
 if __name__ == "__main__":
     # Initialize

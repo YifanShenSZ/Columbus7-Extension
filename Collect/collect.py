@@ -44,8 +44,8 @@ def SingleState(args: argparse.Namespace):
                 temp=lines[j+2+args.NState].split()
                 energy[i]=float(temp[len(temp)-5].replace('D','e'))
         # Output
-        with open(args.BatchPath/'energy.all','w') as f:
-            for i in range(NData): print(energy[i],file=f)
+        with open(args.BatchPath/'energy.data','w') as f:
+            for i in range(NData): print('%25.15E'%energy[i],file=f)
     else: # collect energy and gradient
         # Read
         for i in range(args.StartDirectory,args.EndDirectory+1):
@@ -64,11 +64,11 @@ def SingleState(args: argparse.Namespace):
                     temp=lines[j].split()
                     for k in range(3): cartgrad[i,j,k]=float(temp[k].replace('D','e'))
         # Output
-        with open(args.BatchPath/'energy.all','w') as f: # energy
-            for i in range(NData): print(energy[i],file=f)
-        with open(args.BatchPath/('cartgrd.drt1.state'+str(args.NState)+'.all'),'w') as f: # gradient
+        with open(args.BatchPath/'energy.data','w') as f: # energy
+            for i in range(NData): print('%25.15E'%energy[i],file=f)
+        with open(args.BatchPath/('cartgrad-'+str(args.NState)+'.data'),'w') as f: # gradient
             for i in range(NData):
-                for j in range(NAtoms): print(cartgrad[i,j,0],cartgrad[i,j,1],cartgrad[i,j,2],sep=' ',file=f)
+                for j in range(NAtoms): print('%25.15E%25.15E%25.15E'%(cartgrad[i,j,0],cartgrad[i,j,1],cartgrad[i,j,2]),file=f)
 
 def MultiState(args: argparse.Namespace):
     # Allocate memory
@@ -88,10 +88,10 @@ def MultiState(args: argparse.Namespace):
                     temp=lines[j+2+k+1].split()
                     energy[i,k]=float(temp[len(temp)-5].replace('D','e'))
         # Output
-        with open(args.BatchPath/'energy.all','w') as f:
+        with open(args.BatchPath/'energy.data','w') as f:
             for i in range(NData):
-                for j in range(args.NState-1): print(energy[i,j],end=' ',file=f)
-                print(energy[i,args.NState-1],file=f)
+                for j in range(args.NState-1): print('%25.15E'%energy[i,j],end='',file=f)
+                print('%25.15E'%energy[i,args.NState-1],file=f)
     else: # collect energy, gradient, transition dipole
         # Read
         for i in range(args.StartDirectory,args.EndDirectory+1):
@@ -127,24 +127,24 @@ def MultiState(args: argparse.Namespace):
                         dipole[i,istate,jstate,1]=float(temp[3].replace('D','e'))
                         dipole[i,istate,jstate,2]=float(temp[4].replace('D','e'))
         # Output
-        with open(args.BatchPath/'energy.all','w') as f: # energy
+        with open(args.BatchPath/'energy.data','w') as f: # energy
             for i in range(NData):
-                for j in range(args.NState-1): print(energy[i,j],end=' ',file=f)
-                print(energy[i,args.NState-1],file=f)
+                for j in range(args.NState-1): print('%25.15E'%energy[i,j],end='',file=f)
+                print('%25.15E'%energy[i,args.NState-1],file=f)
         for istate in range(args.NState): # gradient
-            with open(args.BatchPath/('cartgrd.drt1.state'+str(istate+1)+'.all'),'w') as f:
+            with open(args.BatchPath/('cartgrad-'+str(istate+1)+'.data'),'w') as f:
                 for i in range(NData):
-                    for j in range(NAtoms): print(cartgrad[i,istate,istate,j,0],cartgrad[i,istate,istate,j,1],cartgrad[i,istate,istate,j,2],sep=' ',file=f)
+                    for j in range(NAtoms): print('%25.15E%25.15E%25.15E'%(cartgrad[i,istate,istate,j,0],cartgrad[i,istate,istate,j,1],cartgrad[i,istate,istate,j,2]),file=f)
             for jstate in range(istate+1,args.NState):
-                with open(args.BatchPath/('cartgrd.nad.drt1.state'+str(istate+1)+'.drt1.state'+str(jstate+1)+'.all'),'w') as f:
+                with open(args.BatchPath/('cartgrad-'+str(istate+1)+'-'+str(jstate+1)+'.data'),'w') as f:
                     for i in range(NData):
                         cartgrad[i,istate,jstate,:,:]=cartgrad[i,istate,jstate,:,:]*(energy[i,jstate]-energy[i,istate])
-                        for j in range(NAtoms): print(cartgrad[i,istate,jstate,j,0],cartgrad[i,istate,jstate,j,1],cartgrad[i,istate,jstate,j,2],sep=' ',file=f)
+                        for j in range(NAtoms): print('%25.15E%25.15E%25.15E'%(cartgrad[i,istate,jstate,j,0],cartgrad[i,istate,jstate,j,1],cartgrad[i,istate,jstate,j,2]),file=f)
         for istate in range(args.NState): # transition dipole
             for jstate in range(istate+1,args.NState):
-                with open(args.BatchPath/('trncils.FROMdrt1.state'+str(istate+1)+'TOdrt1.state'+str(jstate+1)+'.all'),'w') as f:
+                with open(args.BatchPath/('transdip-'+str(istate+1)+'-'+str(jstate+1)+'.data'),'w') as f:
                     for i in range(NData):
-                        print(dipole[i,istate,jstate,0],dipole[i,istate,jstate,1],dipole[i,istate,jstate,2],sep=' ',file=f)
+                        print('%25.15E%25.15E%25.15E'%(dipole[i,istate,jstate,0],dipole[i,istate,jstate,1],dipole[i,istate,jstate,2]),file=f)
 
 def mcscf(args: argparse.Namespace): # Currently, energy only
     # Allocate memory
@@ -160,10 +160,10 @@ def mcscf(args: argparse.Namespace): # Currently, energy only
             for k in range(args.NState):
                 energy[i,k]=float(lines[j+k+1][42:61].strip())
     # Output energy
-    with open(args.BatchPath/'energy.all','w') as f:
+    with open(args.BatchPath/'energy.data','w') as f:
         for i in range(NData):
-            for j in range(args.NState-1): print(energy[i,j],end='\t',file=f)
-            print(energy[i,args.NState-1],file=f)
+            for j in range(args.NState-1): print('%25.15E'%energy[i,j],end='\t',file=f)
+            print('%25.15E'%energy[i,args.NState-1],file=f)
 
 if __name__ == "__main__":
     # Initialize
