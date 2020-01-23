@@ -4,9 +4,7 @@
 !Output: geom.all
 !Dependency: my Fortran-Library, as written in makefile
 program main
-    use General; use Mathematics; use LinearAlgebra
-    use NonlinearOptimization; use Chemistry
-    use GeometryTransformation
+    use FortranLibrary
     implicit none
 !Number of steps along the path
     integer::NStep=10

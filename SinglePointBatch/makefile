@@ -1,11 +1,7 @@
-libdir = /usr/local/lib
-incdir = /usr/local/include
-
-libflg = -I$(incdir) -L$(libdir) -lFL
-cplflg = -m64 -xCORE-AVX2 -mtune=core-avx2 -mkl -O3
+flag = -m64 -xCORE-AVX2 -mtune=core-avx2 -no-prec-div -fp-model fast=2 -mkl -parallel -O3
 
 loop.exe: loop.f90
-	ifort $(libflg) $(cplflg) $^ -o $@
+	ifort $(flag) -lFL $^ -o $@
 
 path.exe: path.f90
-	ifort $(libflg) $(cplflg) $^ -o $@
+	ifort $(flag) -lFL $^ -o $@
