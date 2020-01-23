@@ -47,15 +47,23 @@ def Hessian(args: argparse.Namespace): # Calculate finite difference Hessian
             hessian[:,j,i]= hessian[:,i,j]
     # Output hessian
     for istate in range(args.NState):
+        # Hessian in Columbus 7 format
         with open(listings/('hessian'+str(istate+1)),'w') as f:
             for i in range(intdim):
                 for j in range(0,intdim,8):
-                    jstart=j
-                    jstop=j+8
+                    jstart=j; jstop=j+8
                     if jstop>intdim: jstop=intdim
                     for jj in range(jstart,jstop):
                         print('%13.6f' % hessian[istate,i,jj],end='',file=f)
                     print(file=f)
+        # Diagonal elements in intcfl format
+        with open(listings/('hessian_diag_'+str(istate+1)),'w') as f:
+            for j in range(0,intdim,8):
+                jstart=j; jstop=j+8
+                if jstop>intdim: jstop=intdim
+                for jj in range(jstart,jstop):
+                    print('%10.2E'%hessian[istate,jj,jj],end='',file=f)
+                print(file=f)
 
 def collect(args: argparse.Namespace):
     # Allocate memory
