@@ -83,7 +83,7 @@ Tighten MRCI gradient tolerance in cigrdin:
 ### Conical intersection search
 * "GDIIS never converges" -- Yarkony
 * polyhesin to start search (to build BFGS hessian): &NACINT{maxit=200,newton=1,iheseq1=1,ihess=0,ipflg=3,accel=1,scale=0.1,kscale=0}/end
-* polyhesin to end search: &NACINT{maxit=200,newton=1,iheseq1=-1,methodn=99*-1ihess=0,ipflg=3,accel=1,scale=1.0,kscale=2,}/end. Copy old h-pieces and continuity
+* polyhesin to end search: &NACINT{maxit=200,newton=1,iheseq1=-1,methodn=99*-1,ihess=0,ipflg=3,accel=1,scale=1.0,kscale=2,}/end. Copy old h-pieces and continuity
 
 ### Weird stuff
 Bug
