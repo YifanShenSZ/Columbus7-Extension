@@ -77,8 +77,14 @@ Tighten MRCI gradient tolerance in cigrdin:
 'maxbl' too small: increase maxbl in cisrtin, usually up to 200000
 
 ### Geometry optimization
+
+#### Minimum
 * NROOT also specifies which surface to optimize on. You can overwrite it with the transition moment input transmomin (i.e. set computing transition moment between m-th and m-th state to optimize on m-th surface)
-* By default GDIIS searches for minimum with BFGS. To search for saddle point, replace bfgs at the last line in gdiisin with sadd
+* By default GDIIS searches for minimum with BFGS. You should see a line in gdiisin as bfgs
+
+#### Saddle point
+* No one has ever tried RGF
+* To search for saddle point with GDIIS, replace the bfgs line in gdiisin with sadd
 
 ### Conical intersection search
 * "GDIIS never converges" -- Yarkony
