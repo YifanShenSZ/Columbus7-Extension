@@ -77,6 +77,10 @@ Tighten MRCI gradient tolerance in cigrdin:
 'maxbl' too small: increase maxbl in cisrtin, usually up to 200000
 
 ### Geometry optimization
+gdiis.x takes initial hessian from:
+1. WORK/hessianinv, for bfgs and sadd
+2. hessian, for bfgs and sadd
+3. intcfl, for bfgs and sadd and coni
 
 #### Minimum
 * NROOT also specifies which surface to optimize on. You can overwrite it with the transition moment input transmomin (i.e. set computing transition moment between m-th and m-th state to optimize on m-th surface)

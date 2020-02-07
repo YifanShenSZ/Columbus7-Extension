@@ -1,7 +1,7 @@
 !Generate a linear path from geometry 1 to geometry 2
 !Number of steps along the path is controled by NStep
 !Input : internal coordinate definition, geom1, geom2, (optional) NStep
-!Output: geom.all
+!Output: geom.data
 !Dependency: my Fortran-Library, as written in makefile
 program main
     use FortranLibrary
@@ -53,7 +53,7 @@ program main
     allocate(dq(intdim)); dq=(q2-q1)/dble(NStep+1)
     allocate(r(intdim))
     allocate(rsave(cartdim))
-    open(unit=99,file='geom.all',status='replace')
+    open(unit=99,file='geom.data',status='replace')
             q=q1+dq
             r=CartesianCoordinater(q,cartdim,intdim,uniquify=chartemp,mass=mass,r0=r1)
             do j=1,NAtoms

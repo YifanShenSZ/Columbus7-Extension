@@ -1,6 +1,6 @@
 !Generate a loop around a certain geometry
 !Input : internal coordinate definition, geom
-!Output: geom.all
+!Output: geom.data
 !Dependency: my Fortran-Library, as written in makefile
 program main
     use FortranLibrary
@@ -35,7 +35,7 @@ program main
 !Generate a loop around the reference geometry
     chartemp='assimilate'
     allocate(q(intdim)); allocate(r(cartdim))
-    open(unit=99,file='geom.all',status='replace')
+    open(unit=99,file='geom.data',status='replace')
         !Example: start from q0, displace 1st internal coordinate
         do i=-5,5
             q=q0
