@@ -19,5 +19,5 @@ Tips:
 All scripts support -h argument to show details
 
 Two examples to prepare appended geometry file: 
-* loop.f90 shows how to generate a loop around a certain geometry
+* scan.f90 shows how to generate a scan around a certain geometry
 * path.f90 shows how to generate a linear path between two geometries

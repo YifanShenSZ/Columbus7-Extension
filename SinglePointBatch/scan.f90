@@ -1,4 +1,4 @@
-!Generate a loop around a certain geometry
+!Generate a scan along a internal coordinate
 !Input : internal coordinate definition, geom
 !Output: geom.data
 !Dependency: my Fortran-Library, as written in makefile
@@ -32,11 +32,11 @@ program main
     close(99)
     cartdim=3*NAtoms
     allocate(q0(intdim)); q0=InternalCoordinateq(r0,intdim,cartdim)
-!Generate a loop around the reference geometry
+!Generate a scan along a internal coordinate
     chartemp='assimilate'
     allocate(q(intdim)); allocate(r(cartdim))
     open(unit=99,file='geom.data',status='replace')
-        !Example: start from q0, displace 1st internal coordinate
+        !Example: start from q0, scan 1st internal coordinate
         do i=-5,5
             q=q0
             q(1)=q(1)+dble(i)*0.01d0
