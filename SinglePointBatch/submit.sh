@@ -4,10 +4,10 @@
 usage="Submit new Columbus7 job or resubmit failed job in current directory
 
 $(basename "$0") [-h] [-q n]
-                 JobScriptPath
+                 JobScript
 
 positional arguments:
-  JobScriptPath  location of the job script for your queuing system
+  JobScript      job script file for your queuing system
 
 optional arguments:
   -h             show this help message and exit

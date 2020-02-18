@@ -10,8 +10,8 @@ import os
 
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument('InputPath',type=Path,help='location of input template')
-    parser.add_argument( 'GeomPath',type=Path,help='location of the appended geometry file')
+    parser.add_argument('input',type=Path,help='input template directory')
+    parser.add_argument( 'geom',type=Path,help='appended geometry file')
     parser.add_argument('NAtoms',type=int,help='number of atoms in the molecule')
     args = parser.parse_args()
     return args
@@ -19,15 +19,15 @@ def parse_args() -> argparse.Namespace: # Command line input
 if __name__ == "__main__":
     # Initialize
     args = parse_args()
-    with open(args.GeomPath,'r') as f: geoms = f.readlines()
-    NGeom = int(len(geoms)/args.NAtoms)
+    with open(args.geom,'r') as f: lines = f.readlines()
+    NGeom = int(len(lines)/args.NAtoms)
     # Do the job
     line=0
     for i in range(NGeom):
         current=Path(str(i))
         if not current.exists(): current.mkdir()
-        os.system('cp '+str(args.InputPath)+'/* '+str(current))
+        os.system('cp '+str(args.input)+'/* '+str(current))
         with open(current/'geom','w') as f:
             for j in range(args.NAtoms):
-                print(geoms[line],end='',file=f) # geoms[line] already ends with \n
+                print(lines[line],end='',file=f) # lines[line] already ends with \n
                 line=line+1
