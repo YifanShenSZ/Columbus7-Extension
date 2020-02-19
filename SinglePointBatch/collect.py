@@ -18,13 +18,13 @@ NAtoms = 0 # Number of atoms
 ''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument('BatchPath',type=Path,help='parent directory of the single point batch directories')
-    parser.add_argument('StartDirectory',type=int,help='collect from directory')
-    parser.add_argument('EndDirectory',type=int,help='StartDirectory to EndDirectory')
-    parser.add_argument('NState',type=int,help='collect from state 1 to NState')
-    parser.add_argument('-s','--single', action='store_true',help='only collect NState-th state')
-    parser.add_argument('-e','--energy' ,action='store_true',help='only collect energy')
-    parser.add_argument('-m','--mcscf',  action='store_true',help='collect MCSCF result rather than MRCI')
+    parser.add_argument('BatchPath', type=Path, help='parent directory of the single point batch directories')
+    parser.add_argument('StartDirectory', type=int, help='collect from directory')
+    parser.add_argument('EndDirectory'  , type=int, help='StartDirectory to EndDirectory')
+    parser.add_argument('NState', type=int, help='collect from state 1 to NState')
+    parser.add_argument('-s', '--single', action='store_true', help='only collect NState-th state')
+    parser.add_argument('-e', '--energy', action='store_true', help='only collect energy')
+    parser.add_argument('-m', '--mcscf' , action='store_true', help='collect MCSCF result rather than MRCI')
     args = parser.parse_args()
     return args
 

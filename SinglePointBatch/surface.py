@@ -6,12 +6,13 @@ Input format = the output of collect.py (energy.all)
 ''' Library '''
 import argparse
 from pathlib import Path
-import numpy as np
+import numpy
 import matplotlib.pyplot as plt
 
+''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument('data',type=Path,help='energy data file')
+    parser.add_argument('data', type=Path, help='energy data file')
     args = parser.parse_args()
     return args
 
@@ -20,7 +21,7 @@ if __name__ == "__main__":
     # Read energy
     with open(args.data,'r') as f: lines=f.readlines()
     n=len(lines); NState=len(lines[0].split())
-    x=np.empty(n); e=np.empty((NState,n))
+    x=numpy.empty(n); e=numpy.empty((NState,n))
     for i in range(n):
         temp=lines[i].split()
         x[i]=i

@@ -1,5 +1,5 @@
 """
-Analyze vibration based on the internal coordinate Hessian
+Generate a scan along an internal coordinate
 """
 
 ''' Library '''
@@ -10,17 +10,17 @@ import numpy
 import FortranLibrary as FL
 import basic
 
-''' Global variable '''
-intdim = 0 # Internal coordinate dimension
-
 ''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument('IntCDefFormat', type=str, help='internal coordinate definition format: Columbus7 or default')
     parser.add_argument('IntCDef', type=Path, help='internal coordinate definition file')
     parser.add_argument('geom',    type=Path, help='Columbus7 geometry file')
-    parser.add_argument('hessian', type=Path, help='Columbus7 hessian file')
-    parser.add_argument('-o', '--output', type=str, default='geom.log', help='output file (default = geom.log)')
+    parser.add_argument('IntC2scan', type=int, help='internal coordinate to scan')
+    parser.add_argument('-b','--bidirection', action='store_true', help='scan bidirectionsally (default = positive only)')
+    parser.add_argument('-n','--NSteps', type=int, default=10  , help='number of scan steps (default = 10)')
+    parser.add_argument('-l','--length', type=int, default=0.01, help='step length (default = 0.01)')
+    parser.add_argument('-o','--output', type=Path, default='geom.data', help='output file (default = geom.data), will append if already exists')
     args = parser.parse_args()
     return args
 
@@ -40,20 +40,16 @@ if __name__ == "__main__":
         FL.DefineInternalCoordinate('Columbus7')
     # Read geometry
     NAtoms, symbol, number, r, mass = basic.read_geom(args.geom)
-    # Read Hessian
-    hessian = basic.read_hessian(args.hessian,intdim,intcdef)
+    cartdim = 3 * NAtoms
+    q = numpy.empty(intdim)
+    FL.InternalCoordinateq(r, q, cartdim, intdim)
     ''' Do the job '''
-    # Get B^T matrix
-    cartdim=3*NAtoms
-    BT = numpy.empty((cartdim,intdim)); q = numpy.empty(intdim)
-    FL.WilsonBMatrixAndInternalCoordinateq(r, BT, q, cartdim, intdim)
-    # Calculate internal coordinate vibration
-    freq = numpy.empty(intdim); LT = numpy.empty((intdim,intdim)); LinvT = numpy.empty((intdim,intdim))    
-    FL.WilsonGFMethod(hessian, BT, mass, freq, LT, LinvT, intdim, NAtoms)
-    # Transform to Cartesian coordinate
-    cartmodeT = numpy.empty((intdim,cartdim))
-    FL.InternalMode2CartesianMode(LT, BT, cartmodeT, intdim, cartdim)
-    # Output for visualization
-    r = r / FL.AInAU
-    freq = freq / FL.cm_1InAu
-    FL.Avogadro_Vibration(NAtoms, symbol, r, intdim, freq, cartmodeT, FileName=args.output)
+    q1 = numpy.empty(q.shape); r1 = numpy.empty(r.shape)
+    if args.bidirection:
+        for i in range(-args.NSteps, 0):
+            q1[:] = q[:]; q1[args.IntC2scan-1] += i * args.length
+            FL.CartesianCoordinater(q1, r1, intdim, cartdim, uniquify='assimilate', mass=mass, r0=r)
+    for i in range(1, args.NSteps+1):
+        q1[:] = q[:]; q1[args.IntC2scan-1] += i * args.length
+        FL.CartesianCoordinater(q1, r1, intdim, cartdim, uniquify='assimilate', mass=mass, r0=r)
+        basic.write_geom(args.output, NAtoms, symbol, number, r, mass)

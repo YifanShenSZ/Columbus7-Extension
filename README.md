@@ -3,11 +3,10 @@ Useful extension and modification for Columbus7
 
 Featured utilities:
 * Various modifications to improve Columbus7 in compatibility and functionality (Modification)
-* Run a batch of single point calculation (SinglePointBatch)
-* Collect the batch (Collect)
+* Run and collect a batch of single point calculation (SinglePointBatch)
 * Calculate Hessian and vibration (Hessian)
 
-See each subdirectory for details
+All scripts support -h argument to show help message. See each subdirectory for details
 
 ## Complement to Columbus7 documentation
 Columbus7 originates in 1980s and preserves many historical codes. Besides, the user community of Columbus7 is always small. As a result, there are compatibility issues and undiscovered bugs, which are out of the coverage of the official documentation

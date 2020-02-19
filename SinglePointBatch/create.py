@@ -8,11 +8,12 @@ import argparse
 from pathlib import Path
 import os
 
+''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument('input',type=Path,help='input template directory')
-    parser.add_argument( 'geom',type=Path,help='appended geometry file')
-    parser.add_argument('NAtoms',type=int,help='number of atoms in the molecule')
+    parser.add_argument('input', type=Path, help='input template directory')
+    parser.add_argument( 'geom', type=Path, help='appended geometry file')
+    parser.add_argument('NAtoms', type=int, help='number of atoms in the molecule')
     args = parser.parse_args()
     return args
 
