@@ -1,6 +1,6 @@
 """
 Collect Columbus7 result from the single point batch
-Output to batch path
+Output to the parent directory of the single point batch directories
 Default mode: collect MRCI energy, gradient, transition dipole
 Alternative modes are available, see optional arguments
 Please note that interstate coupling replaces nonadiabatic coupling

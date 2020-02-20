@@ -32,12 +32,10 @@ if __name__ == "__main__":
     else: IntCDef = Path('InternalCoordinateDefinition')
     if args.IntCDef != IntCDef:
         shutil.copy(args.IntCDef, IntCDef)
-        intdim, intcdef = FL.FetchInternalCoordinateDefinition(args.IntCDefFormat)
-        FL.DefineInternalCoordinate('Columbus7')
+        intdim = FL.DefineInternalCoordinate(args.IntCDefFormat)
         IntCDef.unlink()
     else:
-        intdim, intcdef = FL.FetchInternalCoordinateDefinition(args.IntCDefFormat)
-        FL.DefineInternalCoordinate('Columbus7')
+        intdim = FL.DefineInternalCoordinate(args.IntCDefFormat)
     # Read geometry
     NAtoms, symbol, number, r, mass = basic.read_geom(args.geom)
     cartdim = 3 * NAtoms
