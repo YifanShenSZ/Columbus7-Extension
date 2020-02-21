@@ -42,10 +42,10 @@ if __name__ == "__main__":
     q2 = numpy.empty(intdim); FL.InternalCoordinateq(r2, q2, cartdim, intdim)
     ''' Do the job '''
     dq = numpy.empty(intdim); dq[:] = (q2[:]-q1[:]) / (args.NSteps+1)
-    q = numpy.empty(intdim)
-    r = numpy.empty(cartdim); rsave = r1.copy()
+    q = numpy.empty(intdim); r = numpy.empty(cartdim)
+    rsave = r1.copy()
     for i in range(1, args.NSteps+1):
-        q[:] = q1[:] + float(i) * dq[:]
+        q[:] = q1[:] + i * dq[:]
         FL.CartesianCoordinater(q, r, intdim, cartdim, uniquify='assimilate', mass=mass, r0=rsave)
         basic.write_geom(args.output, NAtoms, symbol, number, r, mass)
         rsave[:] = r[:]
