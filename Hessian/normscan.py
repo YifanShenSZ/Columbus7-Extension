@@ -16,8 +16,8 @@ intdim = 0 # Internal coordinate dimension
 ''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument('IntCDefFormat', type=str, help='internal coordinate definition format: Columbus7 or default')
-    parser.add_argument('IntCDef', type=Path, help='internal coordinate definition file')
+    parser.add_argument('IntCoordDefForm', type=str , help='internal coordinate definition format: Columbus7 or default')
+    parser.add_argument('IntCoordDefFile', type=Path, help='internal coordinate definition file')
     parser.add_argument('geom',    type=Path, help='Columbus7 geometry file')
     parser.add_argument('hessian', type=Path, help='Columbus7 hessian file')
     parser.add_argument('coord2scan', type=int, help='normal mode to scan')
@@ -31,18 +31,11 @@ def parse_args() -> argparse.Namespace: # Command line input
 
 if __name__ == "__main__":
     ''' Initialize '''
+    # Command line input
     args = parse_args()
     # Define internal coordinate
-    if args.IntCDefFormat == 'Columbus7': IntCDef = Path('intcfl') 
-    else: IntCDef = Path('InternalCoordinateDefinition')
-    if args.IntCDef != IntCDef:
-        shutil.copy(args.IntCDef, IntCDef)
-        intdim, intcdef = FL.FetchInternalCoordinateDefinition(args.IntCDefFormat)
-        FL.DefineInternalCoordinate('Columbus7')
-        IntCDef.unlink()
-    else:
-        intdim, intcdef = FL.FetchInternalCoordinateDefinition(args.IntCDefFormat)
-        FL.DefineInternalCoordinate('Columbus7')
+    intdim, intcdef = FL.FetchInternalCoordinateDefinition(args.IntCoordDefForm, file=args.IntCoordDefFile)
+    FL.DefineInternalCoordinate(args.IntCoordDefForm, file=args.IntCoordDefFile)
     # Read geometry
     NAtoms, symbol, number, r, mass = basic.read_geom(args.geom)
     # Read Hessian

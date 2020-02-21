@@ -19,7 +19,7 @@ def parse_args() -> argparse.Namespace: # Command line input
 
 if __name__ == "__main__":
     # Initialize
-    args = parse_args()
+    args = parse_args() # Command line input
     with open(args.geom,'r') as f: lines = f.readlines()
     NGeom = int(len(lines)/args.NAtoms)
     # Do the job

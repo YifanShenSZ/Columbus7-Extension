@@ -192,7 +192,7 @@ def collect(args: argparse.Namespace):
 
 if __name__ == "__main__":
     # Initialize
-    args = parse_args()
+    args = parse_args() # Command line input
     listings=args.DISPLACEMENTPath/'..'/'LISTINGS' # Get listings
     if not listings.exists(): listings.mkdir()
     with open(args.DISPLACEMENTPath/'displfl','r') as f:

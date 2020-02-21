@@ -17,7 +17,7 @@ def parse_args() -> argparse.Namespace: # Command line input
     return args
 
 if __name__ == "__main__":
-    args = parse_args()
+    args = parse_args() # Command line input
     # Read energy
     with open(args.data,'r') as f: lines=f.readlines()
     n=len(lines); NState=len(lines[0].split())

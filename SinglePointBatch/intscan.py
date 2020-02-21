@@ -13,9 +13,9 @@ import basic
 ''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument('IntCDefFormat', type=str, help='internal coordinate definition format: Columbus7 or default')
-    parser.add_argument('IntCDef', type=Path, help='internal coordinate definition file')
-    parser.add_argument('geom',    type=Path, help='Columbus7 geometry file')
+    parser.add_argument('IntCoordDefForm', type=str , help='internal coordinate definition format: Columbus7 or default')
+    parser.add_argument('IntCoordDefFile', type=Path, help='internal coordinate definition file')
+    parser.add_argument('geom', type=Path, help='Columbus7 geometry file')
     parser.add_argument('coord2scan', type=int, help='internal coordinate to scan')
     parser.add_argument('-b', '--bidirection', action='store_true', help='scan bidirectionsally (default = positive only)')
     parser.add_argument('-n', '--NSteps', type=int, default=10  , help='number of scan steps (default = 10)')
@@ -26,16 +26,10 @@ def parse_args() -> argparse.Namespace: # Command line input
 
 if __name__ == "__main__":
     ''' Initialize '''
+    # Command line input
     args = parse_args()
     # Define internal coordinate
-    if args.IntCDefFormat == 'Columbus7': IntCDef = Path('intcfl') 
-    else: IntCDef = Path('InternalCoordinateDefinition')
-    if args.IntCDef != IntCDef:
-        shutil.copy(args.IntCDef, IntCDef)
-        intdim = FL.DefineInternalCoordinate(args.IntCDefFormat)
-        IntCDef.unlink()
-    else:
-        intdim = FL.DefineInternalCoordinate(args.IntCDefFormat)
+    intdim = FL.DefineInternalCoordinate(args.IntCoordDefForm, file=args.IntCoordDefFile)
     # Read geometry
     NAtoms, symbol, number, r, mass = basic.read_geom(args.geom)
     cartdim = 3 * NAtoms

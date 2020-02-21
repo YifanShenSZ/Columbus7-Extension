@@ -167,7 +167,7 @@ def mcscf(args: argparse.Namespace): # Currently, energy only
 
 if __name__ == "__main__":
     # Initialize
-    args = parse_args()
+    args = parse_args() # Command line input
     NData = args.EndDirectory - args.StartDirectory + 1
     with open(args.BatchPath/str(args.StartDirectory)/'geom','r') as f: # Get NAtoms
         NAtoms=len(f.readlines())

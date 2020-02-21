@@ -6,7 +6,6 @@ Return a file with geometry + frequencies + normal modes visualizable in Avogadr
 ''' Library '''
 import argparse
 from pathlib import Path
-import shutil
 import numpy
 import FortranLibrary as FL
 import basic
@@ -17,11 +16,11 @@ intdim = 0 # Internal coordinate dimension
 ''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument('IntCDefFormat', type=str, help='internal coordinate definition format: Columbus7 or default')
-    parser.add_argument('IntCDef', type=Path, help='internal coordinate definition file')
+    parser.add_argument('IntCoordDefForm', type=str , help='internal coordinate definition format: Columbus7 or default')
+    parser.add_argument('IntCoordDefFile', type=Path, help='internal coordinate definition file')
     parser.add_argument('geom',    type=Path, help='Columbus7 geometry file')
     parser.add_argument('hessian', type=Path, help='Columbus7 hessian file')
-    parser.add_argument('-o', '--output', type=str, default='geom.log', help='output file (default = geom.log)')
+    parser.add_argument('-o', '--output', type=Path, default='geom.log', help='output file (default = geom.log)')
     parser.add_argument('-i', '--intcoord', action='store_true', help='additionally output internal coordinate normal modes')
     parser.add_argument('-io', '--intcoordoutput', type=Path, default='geom.int', help='internal coordinate normal modes output file (default = geom.int)')
     args = parser.parse_args()
@@ -29,18 +28,11 @@ def parse_args() -> argparse.Namespace: # Command line input
 
 if __name__ == "__main__":
     ''' Initialize '''
+    # Command line input
     args = parse_args()
     # Define internal coordinate
-    if args.IntCDefFormat == 'Columbus7': IntCDef = Path('intcfl') 
-    else: IntCDef = Path('InternalCoordinateDefinition')
-    if args.IntCDef != IntCDef:
-        shutil.copy(args.IntCDef, IntCDef)
-        intdim, intcdef = FL.FetchInternalCoordinateDefinition(args.IntCDefFormat)
-        FL.DefineInternalCoordinate('Columbus7')
-        IntCDef.unlink()
-    else:
-        intdim, intcdef = FL.FetchInternalCoordinateDefinition(args.IntCDefFormat)
-        FL.DefineInternalCoordinate('Columbus7')
+    intdim, intcdef = FL.FetchInternalCoordinateDefinition(args.IntCoordDefForm, file=args.IntCoordDefFile)
+    FL.DefineInternalCoordinate(args.IntCoordDefForm, file=args.IntCoordDefFile)
     # Read geometry
     NAtoms, symbol, number, r, mass = basic.read_geom(args.geom)
     # Read Hessian
@@ -65,7 +57,7 @@ if __name__ == "__main__":
     # Here we use infinity-norm to normalize Cartesian coordinate normal mode
     # Actually, normalize to 9.99 since the visualization file format is %5.2f
     for i in range(intdim): cartmodeT[i,:] *= 9.99 / numpy.amax(numpy.abs(cartmodeT[i,:]))
-    FL.Avogadro_Vibration(NAtoms, symbol, r, intdim, freq, cartmodeT, FileName=args.output)
+    FL.Avogadro_Vibration(NAtoms, symbol, r, intdim, freq, cartmodeT, file=args.output)
     if args.intcoord:
         # Wilson GF method normalizes internal coordinate normal mode by Hessian metric
         # However, this is inconvienient to tell the contribution of each internal coordinate
