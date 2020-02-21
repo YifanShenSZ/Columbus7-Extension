@@ -8,5 +8,5 @@ Installation
 
 Utilities
 * For special Rydberg basis, add Rydberg.bas to $COLUMBUS/source/iargos/basis after installation
-* To tune ao-mo integral cutoff threshold, replace $COLUMBUS/source/mcscf/mcscf2.f before installation (search 'yshen' for my code)
+* To tune ao-mo integral cutoff threshold, replace $COLUMBUS/source/mcscf/mcscf2.f before installation (search 'YifanShenSZ' for my code)
 * For minimum energy crossing point search, replace $COLUMBUS/polyhess.x after installation

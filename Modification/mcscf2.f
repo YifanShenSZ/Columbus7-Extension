@@ -2690,8 +2690,8 @@ c
       real*8  h1(*),ecore0,bdg2e(*)
 
 c
-c yshen modification 1
-      logical:: flag_yshen
+c YifanShenSZ modification 1
+      logical:: flag_YifanShenSZ
 c end modification 1
 c
 
@@ -2771,10 +2771,10 @@ c
 c     # default threshhold value for small integrals.
       acracy%thresh=5.0d-12
 
-c yshen modification 2
-      inquire(file='mcscfin_yshen',exist=flag_yshen)
-      if(flag_yshen) then
-          open(unit=99,file='mcscfin_yshen',status='old')
+c YifanShenSZ modification 2
+      inquire(file='mcscfin_YifanShenSZ',exist=flag_YifanShenSZ)
+      if(flag_YifanShenSZ) then
+          open(unit=99,file='mcscfin_YifanShenSZ',status='old')
               read(99,*)acracy%thresh
           close(99)
       end if
