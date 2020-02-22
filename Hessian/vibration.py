@@ -10,9 +10,6 @@ import numpy
 import FortranLibrary as FL
 import basic
 
-''' Global variable '''
-intdim = 0 # Internal coordinate dimension
-
 ''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
