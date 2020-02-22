@@ -28,7 +28,7 @@ def parse_args() -> argparse.Namespace: # Command line input
     args = parser.parse_args()
     return args
 
-def Hessian(args: argparse.Namespace): # Calculate finite difference Hessian
+def Hessian(args: argparse.Namespace) -> None: # Calculate finite difference Hessian
     # Read internal coordinate gradients
     intgrad=numpy.empty((intdim,2,args.NState,intdim))
     for i in range(intdim):
@@ -66,7 +66,7 @@ def Hessian(args: argparse.Namespace): # Calculate finite difference Hessian
                     print('%10.2E'%hessian[istate,jj,jj],end='',file=f)
                 print(file=f)
 
-def collect(args: argparse.Namespace):
+def collect(args: argparse.Namespace) -> None: # Collect geometry, MRCI energy, gradient, transition dipole
     # Allocate memory
     geom=[]
     ref_energy  =numpy.empty( args.NState)
@@ -202,8 +202,8 @@ if __name__ == "__main__":
         for i in range(intdim):
             temp=lines[3+2*i].split()  ; displ[i,0]=float(temp[1])
             temp=lines[3+2*i+1].split(); displ[i,1]=float(temp[1])
+    if args.collect: # Get NAtoms
+        with open(args.DISPLACEMENTPath/'REFPOINT'/'geom','r') as f: NAtoms=len(f.readlines())
     ''' Do the job ''' 
     Hessian(args)
-    if args.collect:
-        with open(args.DISPLACEMENTPath/'REFPOINT'/'geom','r') as f: NAtoms=len(f.readlines()) # Get NAtoms
-        collect(args)
+    if args.collect: collect(args)

@@ -77,7 +77,7 @@ Tighten MRCI gradient tolerance in cigrdin:
 
 ### Geometry optimization
 gdiis.x takes initial hessian from:
-1. WORK/hessianinv, for bfgs and sadd
+1. WORK/hessianinv, for bfgs
 2. hessian, for bfgs and sadd
 3. intcfl, for bfgs and sadd and coni
 
