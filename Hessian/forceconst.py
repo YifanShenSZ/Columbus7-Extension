@@ -191,7 +191,7 @@ def collect(args: argparse.Namespace):
                         print('%25.15E%25.15E%25.15E'%(dipole[i,ii,istate,jstate,0],dipole[i,ii,istate,jstate,1],dipole[i,ii,istate,jstate,2]),file=f)
 
 if __name__ == "__main__":
-    # Initialize
+    ''' Initialize '''
     args = parse_args() # Command line input
     listings=args.DISPLACEMENTPath/'..'/'LISTINGS' # Get listings
     if not listings.exists(): listings.mkdir()
@@ -202,8 +202,8 @@ if __name__ == "__main__":
         for i in range(intdim):
             temp=lines[3+2*i].split()  ; displ[i,0]=float(temp[1])
             temp=lines[3+2*i+1].split(); displ[i,1]=float(temp[1])
-    if args.collect: # Get NAtoms
-        with open(args.DISPLACEMENTPath/'REFPOINT'/'geom','r') as f: NAtoms=len(f.readlines())
-    # Do the job
-    if args.collect: collect(args) # collect can check if job converged
+    ''' Do the job ''' 
     Hessian(args)
+    if args.collect:
+        with open(args.DISPLACEMENTPath/'REFPOINT'/'geom','r') as f: NAtoms=len(f.readlines()) # Get NAtoms
+        collect(args)
