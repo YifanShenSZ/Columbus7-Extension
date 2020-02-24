@@ -13,16 +13,16 @@ import basic
 ''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument('IntCoordDefForm', type=str , help='internal coordinate definition format: Columbus7 or default')
-    parser.add_argument('IntCoordDefFile', type=Path, help='internal coordinate definition file')
+    parser.add_argument('IntCoordDefForm', type=str, help='internal coordinate definition format: Columbus7 or default')
+    parser.add_argument('IntCoordDef', type=Path, help='internal coordinate definition file')
     parser.add_argument('geom',    type=Path, help='Columbus7 geometry file')
     parser.add_argument('hessian', type=Path, help='Columbus7 hessian file')
     parser.add_argument('coord2scan', type=int, help='normal mode to scan')
-    parser.add_argument('-c', '--cartscan',    action='store_true', help='alternatively scan along Cartesian coordinate normal mode')
-    parser.add_argument('-b', '--bidirection', action='store_true', help='scan bidirectionsally (default = positive only)')
-    parser.add_argument('-n', '--NSteps', type=int, default=10 , help='number of scan steps (default = 10)')
-    parser.add_argument('-l', '--length', type=int, default=0.1, help='step length (default = 0.1)')
-    parser.add_argument('-o', '--output', type=Path, default='geom.data', help='output file (default = geom.data), will append if already exists')
+    parser.add_argument('-c','--cartscan',    action='store_true', help='alternatively scan along Cartesian coordinate normal mode')
+    parser.add_argument('-b','--bidirection', action='store_true', help='scan bidirectionsally (default = positive only)')
+    parser.add_argument('-n','--NSteps', type=int, default=10, help='number of scan steps (default = 10)')
+    parser.add_argument('-l','--length', type=int, default=1 , help='step length (default = 1)')
+    parser.add_argument('-o','--output', type=Path, default='geom.data', help='output file (default = geom.data), will append if already exists')
     args = parser.parse_args()
     return args
 
@@ -31,12 +31,12 @@ if __name__ == "__main__":
     # Command line input
     args = parse_args()
     # Define internal coordinate
-    intdim, intcdef = FL.FetchInternalCoordinateDefinition(args.IntCoordDefForm, file=args.IntCoordDefFile)
-    FL.DefineInternalCoordinate(args.IntCoordDefForm, file=args.IntCoordDefFile)
+    intdim, intcoorddef = FL.FetchInternalCoordinateDefinition(args.IntCoordDefForm, file=args.IntCoordDef)
+    FL.DefineInternalCoordinate(args.IntCoordDefForm, file=args.IntCoordDef)
     # Read geometry
     NAtoms, symbol, number, r, mass = basic.read_geom(args.geom)
     # Read Hessian
-    hessian = basic.read_hessian(args.hessian,intdim,intcdef)
+    hessian = basic.read_hessian(args.hessian,intdim,intcoorddef)
     # Get B^T matrix
     cartdim=3*NAtoms
     BT = numpy.empty((cartdim,intdim)); q = numpy.empty(intdim)

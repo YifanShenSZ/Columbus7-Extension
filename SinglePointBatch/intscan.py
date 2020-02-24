@@ -17,10 +17,10 @@ def parse_args() -> argparse.Namespace: # Command line input
     parser.add_argument('IntCoordDefFile', type=Path, help='internal coordinate definition file')
     parser.add_argument('geom', type=Path, help='Columbus7 geometry file')
     parser.add_argument('coord2scan', type=int, help='internal coordinate to scan')
-    parser.add_argument('-b', '--bidirection', action='store_true', help='scan bidirectionsally (default = positive only)')
-    parser.add_argument('-n', '--NSteps', type=int, default=10  , help='number of scan steps (default = 10)')
-    parser.add_argument('-l', '--length', type=int, default=0.01, help='step length (default = 0.01)')
-    parser.add_argument('-o', '--output', type=Path, default='geom.data', help='output file (default = geom.data), will append if already exists')
+    parser.add_argument('-b','--bidirection', action='store_true', help='scan bidirectionsally (default = positive only)')
+    parser.add_argument('-n','--NSteps', type=int, default=10  , help='number of scan steps (default = 10)')
+    parser.add_argument('-l','--length', type=int, default=0.01, help='step length (default = 0.01)')
+    parser.add_argument('-o','--output', type=Path, default='geom.data', help='output file (default = geom.data), will append if already exists')
     args = parser.parse_args()
     return args
 

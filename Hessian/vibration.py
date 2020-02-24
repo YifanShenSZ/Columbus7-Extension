@@ -13,13 +13,13 @@ import basic
 ''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument('IntCoordDefForm', type=str , help='internal coordinate definition format: Columbus7 or default')
-    parser.add_argument('IntCoordDefFile', type=Path, help='internal coordinate definition file')
+    parser.add_argument('IntCoordDefForm', type=str, help='internal coordinate definition format: Columbus7 or default')
+    parser.add_argument('IntCoordDef', type=Path, help='internal coordinate definition file')
     parser.add_argument('geom',    type=Path, help='Columbus7 geometry file')
     parser.add_argument('hessian', type=Path, help='Columbus7 hessian file')
-    parser.add_argument('-o', '--output', type=Path, default='geom.log', help='output file (default = geom.log)')
-    parser.add_argument('-i', '--intcoord', action='store_true', help='additionally output internal coordinate normal modes')
-    parser.add_argument('-io', '--intcoordoutput', type=Path, default='geom.int', help='internal coordinate normal modes output file (default = geom.int)')
+    parser.add_argument('-o','--output', type=Path, default='geom.log', help='output file (default = geom.log)')
+    parser.add_argument('-i','--intcoord', action='store_true', help='additionally output internal coordinate normal modes')
+    parser.add_argument('-io','--intcoordoutput', type=Path, default='geom.int', help='internal coordinate normal modes output file (default = geom.int)')
     args = parser.parse_args()
     return args
 
@@ -28,12 +28,12 @@ if __name__ == "__main__":
     # Command line input
     args = parse_args()
     # Define internal coordinate
-    intdim, intcdef = FL.FetchInternalCoordinateDefinition(args.IntCoordDefForm, file=args.IntCoordDefFile)
-    FL.DefineInternalCoordinate(args.IntCoordDefForm, file=args.IntCoordDefFile)
+    intdim, intcoorddef = FL.FetchInternalCoordinateDefinition(args.IntCoordDefForm, file=args.IntCoordDef)
+    FL.DefineInternalCoordinate(args.IntCoordDefForm, file=args.IntCoordDef)
     # Read geometry
     NAtoms, symbol, number, r, mass = basic.read_geom(args.geom)
     # Read Hessian
-    hessian = basic.read_hessian(args.hessian,intdim,intcdef)
+    hessian = basic.read_hessian(args.hessian,intdim,intcoorddef)
     ''' Do the job '''
     # Get B^T matrix
     cartdim=3*NAtoms

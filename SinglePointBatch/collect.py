@@ -162,7 +162,7 @@ def mcscf(args: argparse.Namespace): # Currently, energy only
     # Output energy
     with open(args.BatchPath/'energy.data','w') as f:
         for i in range(NData):
-            for j in range(args.NState-1): print('%25.15E'%energy[i,j],end='\t',file=f)
+            for j in range(args.NState-1): print('%25.15E'%energy[i,j],end='',file=f)
             print('%25.15E'%energy[i,args.NState-1],file=f)
 
 if __name__ == "__main__":
