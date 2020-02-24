@@ -39,6 +39,6 @@ if __name__ == "__main__":
     rsave = r1.copy()
     for i in range(1, args.NSteps+1):
         q[:] = q1[:] + i * dq[:]
-        FL.CartesianCoordinater(q, r, intdim, cartdim, uniquify='assimilate', mass=mass, r0=rsave)
+        FL.CartesianCoordinater(q, r, intdim, cartdim, r0=rsave)
         basic.write_geom(args.output, NAtoms, symbol, number, r, mass)
         rsave[:] = r[:]

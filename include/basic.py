@@ -38,7 +38,7 @@ def write_geom(GeomFile:Path, NAtoms:int, symbol:List, number:List, r:List, mass
     with open(GeomFile,'a') as f:
         for i in range(NAtoms):
             print((' %2s  %5.1f%14.8f%14.8f%14.8f%14.8f')%\
-            (symbol[i],number[i],r[3*i],r[3*i+1],r[3*i+2],mass[i]/FL.AMUInAU),file=f)
+                (symbol[i],number[i],r[3*i],r[3*i+1],r[3*i+2],mass[i]/FL.AMUInAU),file=f)
 
 # Read Columbus7 Hessian file, return Hessian in atomic unit
 def read_hessian(HessianFile: Path, intdim: int, intcdef: List) -> numpy.ndarray:

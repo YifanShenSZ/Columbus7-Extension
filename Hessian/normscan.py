@@ -61,14 +61,14 @@ if __name__ == "__main__":
         if args.bidirection:
             rall = numpy.empty((args.NSteps,r.shape[0]))
             q1[:] = q[:] - args.length * intmodeT[args.coord2scan-1, :]
-            FL.CartesianCoordinater(q1, rall[0,:], intdim, cartdim, uniquify='assimilate', mass=mass, r0=r)
+            FL.CartesianCoordinater(q1, rall[0,:], intdim, cartdim, r0=r)
             for i in range(1, args.NSteps):
                 q1[:] = q[:] - (i+1) * args.length * intmodeT[args.coord2scan-1, :]
-                FL.CartesianCoordinater(q1, rall[i,:], intdim, cartdim, uniquify='assimilate', mass=mass, r0=rall[i-1,:])
+                FL.CartesianCoordinater(q1, rall[i,:], intdim, cartdim, r0=rall[i-1,:])
             for i in range(args.NSteps): basic.write_geom(args.output, NAtoms, symbol, number, rall[args.NSteps-1-i,:], mass)
         rsave = r.copy()
         for i in range(1, args.NSteps+1):
             q1[:] = q[:] + i * args.length * intmodeT[args.coord2scan-1, :]
-            FL.CartesianCoordinater(q1, r1, intdim, cartdim, uniquify='assimilate', mass=mass, r0=rsave)
+            FL.CartesianCoordinater(q1, r1, intdim, cartdim, r0=rsave)
             basic.write_geom(args.output, NAtoms, symbol, number, r1, mass)
             rsave[:] = r1[:]
