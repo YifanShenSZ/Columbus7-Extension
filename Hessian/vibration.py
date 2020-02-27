@@ -38,13 +38,13 @@ if __name__ == "__main__":
     # Get B^T matrix
     cartdim=3*NAtoms
     BT = numpy.empty((cartdim,intdim)); q = numpy.empty(intdim)
-    FL.WilsonBMatrixAndInternalCoordinate(r, BT, q, cartdim, intdim)
+    FL.WilsonBMatrixAndInternalCoordinate(r, BT, q)
     # Calculate vibration
     freq = numpy.empty(intdim)
     intmodeT = numpy.empty((intdim,intdim))
     LinvT = numpy.empty((intdim,intdim))
     cartmodeT = numpy.empty((intdim,cartdim))
-    FL.WilsonGFMethod(hessian, BT, mass, freq, intmodeT, LinvT, cartmodeT, intdim, NAtoms)
+    FL.WilsonGFMethod(hessian, BT, mass, freq, intmodeT, LinvT, cartmodeT)
     ''' Output '''
     # Convert to human unit
     r = r / FL.AInAU
