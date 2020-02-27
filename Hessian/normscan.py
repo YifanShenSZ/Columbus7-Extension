@@ -40,13 +40,13 @@ if __name__ == "__main__":
     # Get B^T matrix
     cartdim=3*NAtoms
     BT = numpy.empty((cartdim,intdim)); q = numpy.empty(intdim)
-    FL.WilsonBMatrixAndInternalCoordinateq(r, BT, q, cartdim, intdim)
+    FL.WilsonBMatrixAndInternalCoordinate(r, BT, q)
     # Get normal mode
     freq = numpy.empty(intdim)
     intmodeT = numpy.empty((intdim,intdim))
     LinvT = numpy.empty((intdim,intdim))
     cartmodeT = numpy.empty((intdim,cartdim))
-    FL.WilsonGFMethod(hessian, BT, mass, freq, intmodeT, LinvT, cartmodeT, intdim, NAtoms)
+    FL.WilsonGFMethod(hessian, BT, mass, freq, intmodeT, LinvT, cartmodeT)
     ''' Do the job '''
     q1 = numpy.empty(q.shape); r1 = numpy.empty(r.shape)
     if args.cartscan:
@@ -61,14 +61,14 @@ if __name__ == "__main__":
         if args.bidirection:
             rall = numpy.empty((args.NSteps,r.shape[0]))
             q1[:] = q[:] - args.length * intmodeT[args.coord2scan-1, :]
-            FL.CartesianCoordinater(q1, rall[0,:], intdim, cartdim, r0=r)
+            FL.CartesianCoordinate(q1, rall[0,:], r0=r)
             for i in range(1, args.NSteps):
                 q1[:] = q[:] - (i+1) * args.length * intmodeT[args.coord2scan-1, :]
-                FL.CartesianCoordinater(q1, rall[i,:], intdim, cartdim, r0=rall[i-1,:])
+                FL.CartesianCoordinate(q1, rall[i,:], r0=rall[i-1,:])
             for i in range(args.NSteps): basic.write_geom(args.output, NAtoms, symbol, number, rall[args.NSteps-1-i,:], mass)
         rsave = r.copy()
         for i in range(1, args.NSteps+1):
             q1[:] = q[:] + i * args.length * intmodeT[args.coord2scan-1, :]
-            FL.CartesianCoordinater(q1, r1, intdim, cartdim, r0=rsave)
+            FL.CartesianCoordinate(q1, r1, r0=rsave)
             basic.write_geom(args.output, NAtoms, symbol, number, r1, mass)
             rsave[:] = r1[:]

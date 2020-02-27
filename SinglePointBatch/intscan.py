@@ -19,7 +19,7 @@ def parse_args() -> argparse.Namespace: # Command line input
     parser.add_argument('coord2scan', type=int, help='internal coordinate to scan')
     parser.add_argument('-b','--bidirection', action='store_true', help='scan bidirectionsally (default = positive only)')
     parser.add_argument('-n','--NSteps', type=int, default=10  , help='number of scan steps (default = 10)')
-    parser.add_argument('-l','--length', type=int, default=0.01, help='step length (default = 0.01)')
+    parser.add_argument('-l','--length', type=float, default=0.01, help='step length (default = 0.01)')
     parser.add_argument('-o','--output', type=Path, default='geom.data', help='output file (default = geom.data), will append if already exists')
     args = parser.parse_args()
     return args
@@ -34,20 +34,20 @@ if __name__ == "__main__":
     NAtoms, symbol, number, r, mass = basic.read_geom(args.geom)
     cartdim = 3 * NAtoms
     q = numpy.empty(intdim)
-    FL.InternalCoordinateq(r, q, cartdim, intdim)
+    FL.InternalCoordinate(r, q)
     ''' Do the job '''
     q1 = numpy.empty(q.shape); r1 = numpy.empty(r.shape)
     if args.bidirection:
         rall = numpy.empty((args.NSteps,r.shape[0]))
         q1[:] = q[:]; q1[args.coord2scan-1] -= args.length
-        FL.CartesianCoordinater(q1, rall[0,:], intdim, cartdim, r0=r)
+        FL.CartesianCoordinate(q1, rall[0,:], r0=r)
         for i in range(1, args.NSteps):
             q1[:] = q[:]; q1[args.coord2scan-1] -= (i+1) * args.length
-            FL.CartesianCoordinater(q1, rall[i,:], intdim, cartdim, r0=rall[i-1,:])
+            FL.CartesianCoordinate(q1, rall[i,:], r0=rall[i-1,:])
         for i in range(args.NSteps): basic.write_geom(args.output, NAtoms, symbol, number, rall[args.NSteps-1-i,:], mass)
     rsave = r.copy()
     for i in range(1, args.NSteps+1):
         q1[:] = q[:]; q1[args.coord2scan-1] += i * args.length
-        FL.CartesianCoordinater(q1, r1, intdim, cartdim, r0=rsave)
+        FL.CartesianCoordinate(q1, r1, r0=rsave)
         basic.write_geom(args.output, NAtoms, symbol, number, r1, mass)
         rsave[:] = r1[:]

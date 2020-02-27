@@ -31,14 +31,14 @@ if __name__ == "__main__":
     NAtoms, symbol, number, r1, mass = basic.read_geom(args.geom1)
     NAtoms, symbol, number, r2, mass = basic.read_geom(args.geom2)
     cartdim = 3 * NAtoms
-    q1 = numpy.empty(intdim); FL.InternalCoordinateq(r1, q1, cartdim, intdim)
-    q2 = numpy.empty(intdim); FL.InternalCoordinateq(r2, q2, cartdim, intdim)
+    q1 = numpy.empty(intdim); FL.InternalCoordinate(r1, q1)
+    q2 = numpy.empty(intdim); FL.InternalCoordinate(r2, q2)
     ''' Do the job '''
     dq = numpy.empty(intdim); dq[:] = (q2[:]-q1[:]) / (args.NSteps+1)
     q = numpy.empty(intdim); r = numpy.empty(cartdim)
     rsave = r1.copy()
     for i in range(1, args.NSteps+1):
         q[:] = q1[:] + i * dq[:]
-        FL.CartesianCoordinater(q, r, intdim, cartdim, r0=rsave)
+        FL.CartesianCoordinate(q, r, r0=rsave)
         basic.write_geom(args.output, NAtoms, symbol, number, r, mass)
         rsave[:] = r[:]
