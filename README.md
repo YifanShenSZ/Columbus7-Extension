@@ -76,10 +76,12 @@ Tighten MRCI gradient tolerance in cigrdin:
 'maxbl' too small: increase maxbl in cisrtin, usually up to 200000
 
 ### Geometry optimization
-gdiis.x takes initial hessian from:
+gdiis.x takes initial Hessian from:
 1. WORK/hessianinv, for bfgs
 2. hessian, for bfgs and sadd
 3. intcfl, for bfgs and sadd and coni
+
+Only bfgs updates Hessian by BFGS method, others keep using initial Hessian
 
 #### Minimum
 * NROOT also specifies which surface to optimize on. You can overwrite it with the transition moment input transmomin (i.e. set computing transition moment between m-th and m-th state to optimize on m-th surface)
@@ -89,10 +91,28 @@ gdiis.x takes initial hessian from:
 * No one has ever tried RGF
 * To search for saddle point with GDIIS, replace the bfgs line in gdiisin with sadd
 
-### Conical intersection search
-* "GDIIS never converges" -- Yarkony
-* polyhesin to start search (to build BFGS hessian): &NACINT{maxit=200,newton=1,iheseq1=1,ihess=0,ipflg=3,accel=1,scale=0.1,kscale=0}/end
-* polyhesin to end search: &NACINT{maxit=200,newton=1,iheseq1=-1,methodn=99*-1,ihess=0,ipflg=3,accel=1,scale=1.0,kscale=2,}/end. Copy old h-pieces and continuity
+### Minimum energy crossing search
+There are 2 steps:
+1. To find a conical intersection seam
+2. To minimize energy on the seam
+
+"GDIIS never converges" -- Yarkony. gdiis.x is only implemented to search for degeneracy rather than minimum energy crossing. So we stick to polyhess.x
+
+WORK/h-pieces and WORK/continuity are the files to continue polyhess.x iteration
+
+polyhesin to approach degenerate seam:
+* &NACINT{maxit=200,newton=1,iheseq1=1,ihess=0,ipflg=3,accel=1,scale=0.1,kscale=0}/end
+* This is actually steepest descent (always use unit Hessian)
+* So there's actually no need to continue with WORK/h-pieces
+* Cris recommends not to continue with WORK/continuity as well
+
+polyhesin to start minimizing energy on the seam (building Hessian):
+* &NACINT{maxit=200,newton=1,iheseq1=-1,methodn=99*-1,ihess=0,ipflg=3,accel=1,scale=0.1,kscale=0,}/end
+* After some iterations, try kscale=2
+
+polyhesin to end search:
+* &NACINT{maxit=200,newton=1,iheseq1=-1,methodn=99*-1,ihess=0,ipflg=3,accel=1,scale=1.0,kscale=2,}/end
+* This is actually Newton-Raphson
 
 ### Weird stuff
 Bug
