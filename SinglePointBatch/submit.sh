@@ -36,7 +36,7 @@ JobScript=$(basename $1)
 for entry in * ; do
     if [ -d $entry ]; then # This is a directory
         cd $entry
-        if [ -f 'geom' ]; then # This is a job directory
+        if [ -f 'geom' ] && [ -f 'control.run' ]; then # This is a job directory
             if [ ! -f 'runc.log' ]; then # This is a new job
                 cp $JobScriptAbsPath .
                 sbatch $JobScript
