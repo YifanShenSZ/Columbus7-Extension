@@ -84,7 +84,7 @@ gdiis.x takes initial Hessian from:
 Only bfgs updates Hessian by BFGS method, others keep using initial Hessian
 
 #### Minimum
-* NROOT also specifies which surface to optimize on. You can overwrite it with the transition moment input transmomin (i.e. set computing transition moment between m-th and m-th state to optimize on m-th surface)
+* NROOT (or FROOT) also specifies which surface to optimize on. You can overwrite it with the transition moment input transmomin (i.e. set computing transition moment between m-th and m-th state to optimize on m-th surface)
 * By default GDIIS searches for minimum with BFGS. You should see a line in gdiisin as bfgs
 
 #### Saddle point
@@ -103,7 +103,7 @@ WORK/h-pieces and WORK/continuity are the files to continue polyhess.x iteration
 polyhesin to approach degenerate seam:
 * &NACINT{maxit=200,newton=1,iheseq1=1,ihess=0,ipflg=3,accel=1,scale=0.1,kscale=0}/end
 * This is actually steepest descent (always use unit Hessian)
-* So there's actually no need to continue with WORK/h-pieces
+* So there is no need to continue with WORK/h-pieces
 * Cris recommends not to continue with WORK/continuity as well
 
 polyhesin to start minimizing energy on the seam (building Hessian):
