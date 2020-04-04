@@ -5,7 +5,6 @@ Generate a scan along an internal coordinate normal mode
 ''' Library '''
 import argparse
 from pathlib import Path
-import shutil
 import numpy
 import FortranLibrary as FL
 import basic
