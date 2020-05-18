@@ -52,6 +52,7 @@ for entry in * ; do
                             rm -r WORK
                         fi
                         rm ${queue}* # Remove queuing system log
+                        cp $JobScriptAbsPath .
                         sbatch $JobScript
                     fi
                 fi
