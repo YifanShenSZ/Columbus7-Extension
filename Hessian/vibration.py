@@ -1,16 +1,14 @@
-"""
+'''
 Analyze vibration based on the internal coordinate Hessian
 Return a file with geometry + frequencies + normal modes visualizable in Avogadro
-"""
+'''
 
-''' Library '''
 import argparse
 from pathlib import Path
 import numpy
 import FortranLibrary as FL
 import basic
 
-''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument('IntCoordDefForm', type=str, help='internal coordinate definition format: Columbus7 or default')

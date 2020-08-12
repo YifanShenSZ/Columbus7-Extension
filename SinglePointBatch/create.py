@@ -1,14 +1,12 @@
-"""
+'''
 Create single point job directories, 
 naming from 0 to the number of geometries - 1 in current directory
-"""
+'''
 
-''' Library '''
 import argparse
 from pathlib import Path
 import os
 
-''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument('input', type=Path, help='input template directory')

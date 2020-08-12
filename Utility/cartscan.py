@@ -1,14 +1,12 @@
-"""
+'''
 Generate a scan along 1 or 2 cartesian direction(s)
-"""
+'''
 
-''' Library '''
 import argparse
 from pathlib import Path
 import numpy; import numpy.linalg
 import basic
 
-''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument('geom', type=Path, help='Columbus7 geometry file')

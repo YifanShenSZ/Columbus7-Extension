@@ -1,15 +1,13 @@
-"""
+'''
 Generate a linear synchronous transit path from geometry 1 to geometry 2
-"""
+'''
 
-''' Library '''
 import argparse
 from pathlib import Path
 import numpy
 import FortranLibrary as FL
 import basic
 
-''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument('IntCoordDefForm', type=str , help='internal coordinate definition format: Columbus7 or default')

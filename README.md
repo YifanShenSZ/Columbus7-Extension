@@ -5,6 +5,7 @@ Featured utilities:
 * Various modifications to improve Columbus7 in compatibility and functionality (Modification)
 * Run and collect a batch of single point calculation (SinglePointBatch)
 * Calculate Hessian and vibration (Hessian)
+* Useful tools to augment Columbus7 (Utility)
 
 All scripts support -h argument to show help message. See each subdirectory for details
 

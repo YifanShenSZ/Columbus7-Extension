@@ -1,21 +1,18 @@
-"""
+'''
 Collect Columbus7 result from the single point batch
 Output to the parent directory of the single point batch directories
 Default mode: collect MRCI energy, gradient, transition dipole
 Alternative modes are available, see optional arguments
 Please note that interstate coupling replaces nonadiabatic coupling
-"""
+'''
 
-''' Library '''
 import argparse
 from pathlib import Path
 import numpy
 
-''' Global variable '''
 NData  = 0 # Number of data points
 NAtoms = 0 # Number of atoms
 
-''' Routine '''
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument('BatchPath', type=Path, help='parent directory of the single point batch directories')
