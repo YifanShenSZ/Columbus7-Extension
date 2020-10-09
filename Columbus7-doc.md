@@ -36,10 +36,13 @@ infofl contains the number of basis in each irreducible representation
 
 ## MCSCF
 MCSCF is a nonlinear optimization problem, so may easily be trapped into local minimum, e.g.:
-* For symmetric molecule, molecular orbital may lose symmetry if not explicitly using symmetry
+* Molecular orbital may lose symmetry if not explicitly using symmetry
+* The molecular orbitals converged by higher symmetry may not converge at the 1st iteration in lower symmetry
+
+### Common bug
+Never freeze mcscf orbitals, otherwise the Hamiltonian matrix elements are buggy
 
 ## MRCI
-### Computation cost
 The upper limit of CI expansion on 24 core avx2 processor computer in 2019 is ~ 100,000,000
 
 ### General modification
