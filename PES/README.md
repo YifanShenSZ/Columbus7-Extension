@@ -1,4 +1,4 @@
-# Utility
+# Potential energy surface (PES)
 
 ## Prepare appended geometry file
 `python3 cartscan.py` generates a scan along 1 or 2 cartesian directions

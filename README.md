@@ -3,9 +3,10 @@ Useful extension and modification for Columbus7
 
 Featured utilities:
 * Various modifications to improve Columbus7 in compatibility and functionality (Modification)
-* Run and collect a batch of single point calculation (SinglePointBatch)
+* CSF selection for MCSCF and MRCI reference (CSF)
+* Run and collect a batch of single point calculation (Batch)
 * Calculate Hessian and vibration (Hessian)
-* Useful tools to augment Columbus7 (Utility)
+* Potential energy surface scan (PES)
 
 All scripts support -h argument to show help message. See each subdirectory for details
 
