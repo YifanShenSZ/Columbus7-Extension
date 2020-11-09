@@ -24,7 +24,7 @@ if __name__ == "__main__":
     # Command line input
     args = parse_args()
     # Define internal coordinate
-    intdim = FL.DefineInternalCoordinate(args.IntCoordDefForm, file=args.IntCoordDefFile)
+    intdim, _ = FL.DefineInternalCoordinate(args.IntCoordDefForm, file=args.IntCoordDefFile)
     # Read geometry
     NAtoms, symbol, number, r1, mass = basic.read_geom(args.geom1)
     NAtoms, symbol, number, r2, mass = basic.read_geom(args.geom2)

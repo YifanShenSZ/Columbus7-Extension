@@ -17,6 +17,8 @@ Solutions to some issues
 * Replace certain files with their counterparts in Modification
 
 ## Basis set
+Linear dependency will not be excluded automatically, so user has to take care of that
+
 To use special basis, do not run prepinp
 
 The basis file ($COLUMBUS/source/iargos/basis/*.bas) format is:
@@ -40,10 +42,10 @@ MCSCF is a nonlinear optimization problem, so may easily be trapped into local m
 * The molecular orbitals converged by higher symmetry may not converge at the 1st iteration in lower symmetry
 
 ### Common bug
-Never freeze mcscf orbitals, otherwise the Hamiltonian matrix elements are buggy
+Never freeze mcscf orbitals, otherwise the Hamiltonian matrix elements are erroneous
 
 ## MRCI
-The upper limit of CI expansion on 24 core avx2 processor computer in 2019 is ~ 100,000,000
+The upper limit of CI expansion on a 24 CPU 128 GB memory computer in 2020 is ~ 240,000,000
 
 ### General modification
 Tighten MCSCF tolerance in mcscfin before running MRCI, recommend:
@@ -55,7 +57,7 @@ To run parallel MRCI:
 * modify nseg in ciudgin according to WORK/ciudg.perf to speed up
 
 Tighten MRCI tolerance in ciudgin before computing gradient, recommend:
-* RTOLCI = 1e-5 or 1e-6
+* RTOLCI = 1e-5
 
 Tighten MRCI gradient tolerance in cigrdin:
 * orbital resolution < wndtol = 1e-9, wnatol = 1e-9, wnvtol = 1e-9
@@ -66,34 +68,40 @@ Tighten MRCI gradient tolerance in cigrdin:
 * FROOT: NROOT computes the lowest NROOT MRCI roots; FROOT follows the FROOT-th MCSCF root and optimizes it with MRCI (keeping tracking by overlap), then output it along with lower MRCI states. FROOT is better at giving the state you want, but may fail when MRCI has different state ordering from MCSCF
 
 ### Common bug
-'maxbl' too small: increase maxbl in cisrtin, usually up to 200000
+* 'maxbl' too small: increase maxbl in cisrtin, usually up to 200000
+* Frozen virtual is not supported in `cigrd.x`
 
 ## Geometry optimization
-gdiis.x takes initial Hessian from:
-1. WORK/hessianinv, for bfgs
-2. hessian, for bfgs and sadd
-3. intcfl, for bfgs and sadd and coni
+The adiabatic surface to optimize on is specified by:
+1. `transmomin`, i.e. set computing transition moment between m-th and m-th state to optimize on m-th surface, or m-th and n-th state for the crossing between m-th and n-th surfaces
+2. If `transmomin` is absent, `NROOT` (or `FROOT`) in `ciudg`
 
-Only bfgs updates Hessian by BFGS method, others keep using initial Hessian
+### Minimum and more
+The task for `gdiis.x` is specified by a line in `gdiisin`:
+* `bfgs` for minimum
+* `sadd` for saddle point
+* `coni` for conical intersection
 
-### Minimum
-* NROOT (or FROOT) also specifies which surface to optimize on. You can overwrite it with the transition moment input transmomin (i.e. set computing transition moment between m-th and m-th state to optimize on m-th surface)
-* By default GDIIS searches for minimum with BFGS. You should see a line in gdiisin as bfgs
+`gdiis.x` takes initial Hessian from:
+1. WORK/hessianinv, for `bfgs`
+2. hessian, for `bfgs` and `sadd`
+3. intcfl, for `bfgs` and `sadd` and `coni`
+
+Only `bfgs` updates Hessian by BFGS method, others keep using initial Hessian
 
 ### Saddle point
-* No one has ever tried RGF
-* To search for saddle point with GDIIS, replace the bfgs line in gdiisin with sadd
+No one has ever tried RGF, since `gdiis.x` works well
 
-## Minimum energy crossing search
+## Minimum energy crossing
 There are 2 steps:
 1. To find a conical intersection seam
 2. To minimize energy on the seam
 
-"GDIIS never converges" -- Yarkony. gdiis.x is only implemented to search for degeneracy rather than minimum energy crossing. So we stick to polyhess.x
+"GDIIS never converges" -- Yarkony. `gdiis.x` is only implemented to search for degeneracy rather than minimum energy crossing. So we stick to `polyhess.x`
 
-polyhess uses Lagrange multiplier + naive Newton iteration + BFGS Hessian update, so the initial guess has to be really close
+`polyhess.x` uses Lagrange multiplier + naive Newton iteration + BFGS Hessian update, so the initial guess has to be really close
 
-WORK/h-pieces and WORK/continuity are the files to continue polyhess.x iteration
+WORK/h-pieces and WORK/continuity are the files to continue `polyhess.x` iteration
 
 polyhesin to approach degenerate seam:
 * &NACINT{maxit=200,newton=1,iheseq1=1,ihess=0,ipflg=3,accel=1,scale=0.1,kscale=0}/end
@@ -103,7 +111,7 @@ polyhesin to approach degenerate seam:
 
 polyhesin to start minimizing energy on the seam (building Hessian):
 * &NACINT{maxit=200,newton=1,iheseq1=-1,methodn=99*-1,ihess=0,ipflg=3,accel=1,scale=0.1,kscale=0,}/end
-* The difference to Newton iteration is `learning rate = scale < 1`
+* The difference to Newton iteration is learning rate = scale < 1
 
 polyhesin to end search:
 * &NACINT{maxit=200,newton=1,iheseq1=-1,methodn=99*-1,ihess=0,ipflg=3,accel=1,scale=1.0,kscale=2,}/end
@@ -120,9 +128,6 @@ Interactive input (colinp)
 Redundant input files generated by colinp
 * infofl.*: when they are the same to infofl
 * daltcomm.new: when it is the same to daltcomm
-
-Orbital
-* The number of each kind of orbitals appearing in cidrtin cannot exceed 256, including the frozen orbitals
 
 Gradient
 * If specifying 'cigrad' in control.run, then runc assumes geometry optimization job, so gdiisin is required
