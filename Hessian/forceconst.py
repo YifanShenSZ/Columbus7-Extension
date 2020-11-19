@@ -11,11 +11,12 @@ import argparse
 from pathlib import Path
 from typing import List
 import numpy
+from numpy.core.numeric import require
 
-listings      = 0 # Output path
-intdim        = 0 # Internal coordinate dimension
-displacements = 0 # displacements[i][j] is the displacement along i-th internal coordinate
-NAtoms        = 0 # Number of atoms
+listings      = 0  # Output path
+intdim        = 0  # Internal coordinate dimension
+displacements = [] # displacements[i][j] is the displacement along i-th internal coordinate
+NAtoms        = 0  # Number of atoms
 
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
@@ -27,6 +28,15 @@ def parse_args() -> argparse.Namespace: # Command line input
 
 def Hessian(args: argparse.Namespace) -> None: # Calculate finite difference Hessian
     hessian = numpy.empty((args.NState, intdim, intdim))
+    for displacement in displacements:
+        # Reference point is required
+        if len(displacement) == 1:
+            intgrad_ref = numpy.empty((args.NState, intdim))
+            dir = Path(args.DISPLACEMENT_path/"REFPOINT")
+            for istate in range(args.NState):
+                with open(dir/'GRADIENTS'/('intgrd.drt1.state' + str(istate+1) + '.sp'), 'r') as f: lines = f.readlines()
+                for i in range(intdim): intgrad_ref[istate, i] = float(lines[i].replace('D', 'e'))
+            break
     # Read internal coordinate gradients and calculate finite difference
     intgrad1 = numpy.empty((intdim))
     intgrad2 = numpy.empty((intdim))
@@ -37,7 +47,7 @@ def Hessian(args: argparse.Namespace) -> None: # Calculate finite difference Hes
             for istate in range(args.NState):
                 with open(dir/'GRADIENTS'/('intgrd.drt1.state' + str(istate+1) + '.sp'), 'r') as f: lines = f.readlines()
                 for i in range(intdim): intgrad1[i] = float(lines[i].replace('D', 'e'))
-                hessian[istate, idim, :] = intgrad1 / displacements[idim][0]
+                hessian[istate, idim, :] = intgrad1 - intgrad_ref[istate, :] / displacements[idim][0]
         elif len(displacements[idim]) == 2:
             dir1 = Path(args.DISPLACEMENT_path/('CALC.c' + str(idim+1) + '.d' + str(displacements[idim][0])))
             dir2 = Path(args.DISPLACEMENT_path/('CALC.c' + str(idim+1) + '.d' + str(displacements[idim][1])))
