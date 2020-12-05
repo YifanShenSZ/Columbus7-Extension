@@ -68,7 +68,7 @@ def Hessian(args: argparse.Namespace) -> None: # Calculate finite difference Hes
         for j in range(i+1, intdim):
             hessian[:, i, j] = (hessian[:, i, j] + hessian[:, j, i]) / 2.0
             hessian[:, j, i] =  hessian[:, i, j]
-    if len(args.irreducible) > 0:
+    if args.irreducible != None:
         start = 0
         for NCoord in args.irreducible:
             stop = start + NCoord
