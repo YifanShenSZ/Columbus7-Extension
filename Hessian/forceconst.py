@@ -13,7 +13,6 @@ import argparse
 from pathlib import Path
 from typing import List
 import numpy
-from numpy.core.numeric import require
 
 listings      = 0  # Output path
 intdim        = 0  # Internal coordinate dimension
