@@ -4,7 +4,6 @@ The files here are meant to replace their Columbus7 counterparts in certain case
 Installation
 * Default install.automatic may have trouble with late shell. Here is my modified version debugged on ubuntu 16 and 18
 * Default install.config is for intel mpi. Here are my versions for open mpi with intel compiler with avx and avx2 instruction sets
-* Default $COLUMBUS/machine.cfg/linux64.ifc.byterecl is fine but may not be optimal. Here are my favourites
 
 Utilities
 * For special Rydberg basis, add Rydberg.bas to $COLUMBUS/source/iargos/basis after installation

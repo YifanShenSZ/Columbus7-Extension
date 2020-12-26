@@ -3,13 +3,11 @@ Columbus7 originates in 1980s and preserves many historical codes. Besides, the 
 
 ## Installation
 Steps
-1. Install a Global Arrays
-2. Enter a desired directory, tar -xzvf the installation package
-3. export COLUMBUS=(current directory)/Columbus
-4. cp Path_To_Global_Arrays/lib/*.a $Columbus
-5. vi install.config. If the last line(s) = cpan || standard || grad || parallel, then delete these line(s). Repeat this operation each time before ./install.automatic
-6. ./install.automatic cpan standard grad
-7. ./install.automatic parallel
+1. Install a *Global Arrays*
+2. Enter a desired directory, unzip the installation package
+3. cp (path to *Global Arrays*)/lib/*.a Columbus
+4. ./install.automatic cpan standard grad parallel
+5. export COLUMBUS=(current directory)/Columbus
 
 Solutions to some issues
 * Global Arrays (subsequently Columbus7) does not support mpi 3.0 standard, e.g. openmpi 4 fails but 3 works
@@ -57,40 +55,40 @@ Tighten MRCI gradient tolerance in cigrdin:
 * if using LAPACK solver (no symmetry): solvelpck = 1, mdir = 0, cdir = 0; else Columbus solver (with symmetry): nmiter = 200, nvrsmx = 200, rtol = 1e-10, dtol = 1e-10
 
 ## Geometry optimization
+`gdiis.x` can be used to search for minimum, saddle point, minimum energy crossing by setting keyword `bfgs`, `sadd`, `coni`
 
-### Minimum and more
-`gdiis.x` takes initial Hessian from:
-1. WORK/hessianinv, for `bfgs`
-2. hessian, for `bfgs` and `sadd`
-3. intcfl, for `bfgs` and `sadd` and `coni`
+The initial Hessian is inputed from:
+1. `WORK/hessianinv`, for `bfgs`
+2. `hessian`, for `bfgs` and `sadd`
+3. `intcfl`, for `bfgs` and `sadd` and `coni`
 
 Only `bfgs` updates Hessian by BFGS method, others keep using initial Hessian
 
+To continue `gdiis.x` iteration, copy `LISTINGS/gdiisfl` to `WORK` since it stores the historical geometires to form the iterative subspace
+
+To continue `coni`, additionally copy `WORK/zetafl` to `WORK` since it stores the Lagrangian multipliers
+
 ### Saddle point
-No one has ever tried RGF, since `gdiis.x` works well
+RGF is claimed to be a global search for saddle point, but no one has ever tried that since `gdiis.x` works well
 
 ### Minimum energy crossing
-There are 2 steps:
-1. To find a conical intersection seam
+`polyhess.x` is Yarkony's method. It requires 2 steps:
+1. To find a degenerate seam
 2. To minimize energy on the seam
 
-`gdiis.x` is only implemented to search for degeneracy rather than minimum energy crossing. So we stick to `polyhess.x`
+To continue `polyhess.x` iteration, copy `WORK/h-pieces` and `WORK/continuity` to `WORK` since they store the BFGS Hessian and the Lagrangian multipliers
 
-`polyhess.x` uses Lagrange multiplier + naive Newton iteration + BFGS Hessian update, so the initial guess has to be really close
-
-WORK/h-pieces and WORK/continuity are the files to continue `polyhess.x` iteration
-
-polyhesin to approach degenerate seam:
+`polyhesin` to approach degenerate seam:
 * &NACINT{maxit=200,newton=1,iheseq1=1,ihess=0,ipflg=3,accel=1,scale=0.1,kscale=0}/end
-* This is actually steepest descent (always use unit Hessian), with `learning rate = scale`
+* This is actually steepest descent (always use unit Hessian), with learning rate = `scale`
 * So there is no need to continue with WORK/h-pieces
 * Cris recommends not to continue with WORK/continuity as well
 
-polyhesin to start minimizing energy on the seam (building Hessian):
+`polyhesin` to start minimizing energy on the seam (building Hessian):
 * &NACINT{maxit=200,newton=1,iheseq1=-1,methodn=99*-1,ihess=0,ipflg=3,accel=1,scale=0.1,kscale=0,}/end
-* The difference to Newton iteration is learning rate = scale < 1
+* The difference to Newton iteration is learning rate = `scale` < 1
 
-polyhesin to end search:
+`polyhesin` to end search:
 * &NACINT{maxit=200,newton=1,iheseq1=-1,methodn=99*-1,ihess=0,ipflg=3,accel=1,scale=1.0,kscale=2,}/end
 * This is Newton iteration
 
