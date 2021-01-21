@@ -10,4 +10,6 @@ Featured utilities:
 
 All scripts support -h argument to show help message. See each subdirectory for details
 
-A complement to Columbus7 documentation is provided in `Columbus7-doc.md`
+A complement to Columbus7 documentation is provided in `documentation.md`
+
+The bugs found in Columbus7 are recorded in `erratum.md`
