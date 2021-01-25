@@ -1,13 +1,15 @@
 # Potential energy surface (PES)
 
 ## Prepare appended geometry file
-`python3 cartscan.py` generates a scan along 1 or 2 cartesian directions
+`cartscan.py` generates a scan along 1 or 2 cartesian direction(s)
 
-`python3 intscan.py` generates a scan along an internal coordinate
+`intscan.py` generates a scan along 1 or 2 internal direction(s)
 
-`python3 path.py` generates a linear synchronous transit path from geometry 1 to geometry 2
+`cartpath.py` generates a Cartesian coordinate linear synchronous transit path between 2 geometries
+
+`intpath.py` generates an internal coordinate linear synchronous transit path between 2 geometries
 
 ## Process data
-`python3 filter.py` filters the information in geom data to suit SurfGen format
+`filter.py` filters the information in geom data to suit SurfGen format
 
-`python3 merge.py` merges the loops along a path into a path
+`merge.py` merges the loops along a path into a path
