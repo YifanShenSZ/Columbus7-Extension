@@ -1,7 +1,7 @@
 '''
 Generate a scan along 1 or 2 Cartesian direction(s)
 
-If 1 direction, scan along positive direction
+If 1 direction, scan along positive or negative direction
 If 2 directions, mesh along both negative and positive directions
 '''
 
@@ -14,7 +14,8 @@ def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument('geom', type=Path, help='Columbus7 geometry file')
     parser.add_argument('direction', type=Path, help='Cartesian vector file')
-    parser.add_argument('-n','--NSteps', type=int, default=10, help='number of scan steps (default = 10)')
+    parser.add_argument('-n','--negative', action='store_true', help='scan along negative direction rather than positive')
+    parser.add_argument('-N','--NSteps', type=int, default=10, help='number of scan steps (default = 10)')
     parser.add_argument('-l','--length', type=float, default=0.01, help='step length (default = 0.01)')
     parser.add_argument('-d2','--direction2', type=Path, help='Cartesian vector file for direction 2')
     parser.add_argument('-n2','--NSteps2', type=int, default=10, help='number of scan steps for direction 2 (default = 10)')
@@ -50,7 +51,10 @@ if __name__ == "__main__":
     r1 = numpy.empty(r.shape)
     if args.direction2 is None:
         for i in range(1, args.NSteps+1):
-            r1 = r + i * args.length * d
+            if args.negative:
+                r1 = r - i * args.length * d
+            else:
+                r1 = r + i * args.length * d
             basic.write_geom(args.output, NAtoms, symbol, number, r1, mass)
     else:
         for i in range(-args.NSteps, args.NSteps+1):
