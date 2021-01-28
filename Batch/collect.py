@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import List
 import numpy
 
+args   = 0  # Command line input
 NData  = 0 # Number of data points
 NAtoms = 0 # Number of atoms
 
@@ -19,8 +20,9 @@ def parse_args() -> argparse.Namespace: # Command line input
     parser.add_argument('StartDirectory', type=int, help='collect from directory')
     parser.add_argument('EndDirectory'  , type=int, help='StartDirectory to EndDirectory')
     parser.add_argument('NState', type=int, help='collect from state 1 to NState')
-    parser.add_argument('-e', '--energy', action='store_true', help='only collect energy')
-    parser.add_argument('-m', '--mcscf' , action='store_true', help='collect MCSCF result rather than MRCI')
+    parser.add_argument('-e','--energy', action='store_true', help='only collect energy')
+    parser.add_argument('-m','--mcscf' , action='store_true', help='collect MCSCF result rather than MRCI')
+    parser.add_argument('-s','--single', action='store_true',  help='NState-th state only')
     args = parser.parse_args()
     return args
 
@@ -67,8 +69,10 @@ def read_directory(direcotry: Path) -> (List, List, List, List):
                 dipole[istate][jstate] = temp[2:5]
     return geom, energy, gradient, dipole
 
-def MultiState(args: argparse.Namespace):
-    if args.energy: # only collect energy
+# Collect geometry, MRCI energy, gradient, transition dipole
+def collect():
+    # energy only
+    if args.energy:
         energies = []
         # Read
         for i in range(args.StartDirectory, args.EndDirectory + 1):
@@ -89,7 +93,7 @@ def MultiState(args: argparse.Namespace):
             for energy in energies:
                 for state in energy: print(state, end='    ', file=f)
                 print(file=f)
-    else: # collect geometry, energy, gradient, transition dipole
+    else: 
         geoms     = []
         energies  = []
         gradients = []
@@ -127,7 +131,55 @@ def MultiState(args: argparse.Namespace):
                         for component in dipole[istate][jstate]: print(component, end='    ', file=f)
                         print(file=f)
 
-def mcscf(args: argparse.Namespace): # Currently, energy only
+# Read directory, return (geometry, energy, gradient)
+# The return data are original strings
+def read_directory_single(direcotry: Path) -> (List, str, str):
+    # geometry
+    with open(direcotry/'geom', 'r') as f: geom = f.readlines()
+    # energy
+    with open(direcotry/'LISTINGS'/'ciudgsm.sp','r') as f: lines=f.readlines()
+    for title_line in range(len(lines)):
+        if 'mr-sdci  convergence criteria satisfied' in lines[title_line]: break
+    if title_line == len(lines) - 1 :
+        print('Warning: mr-sdci did not converge at job ' + str(direcotry))
+    else:
+        temp = lines[title_line + 2 + args.NState].split()
+        energy = temp[len(temp) - 5]
+        # gradient
+        with open(direcotry/'GRADIENTS'/('cartgrd.drt1.state' + str(args.NState) + '.sp'), 'r') as f:
+            gradient = f.readlines()
+    return geom, energy, gradient
+
+# Collect geometry, MRCI energy, gradient
+def collect_single() -> None:
+    geoms     = []
+    energies  = []
+    gradients = []
+    # Read
+    for i in range(args.StartDirectory, args.EndDirectory + 1):
+        geom, energy, gradient = read_directory_single(args.BatchPath/str(i))
+        geoms    .append(geom    )
+        energies .append(energy  )
+        gradients.append(gradient)
+    # Output
+    # geometry
+    with open(args.BatchPath/'geom.data','w') as f:
+        for geom in geoms:
+            for atom in geom:
+                print(atom[:2], atom[10:52], sep='', end='\n', file=f)
+    # energy
+    with open(args.BatchPath/'energy.data','w') as f:
+        for energy in energies:
+            for state in energy: print(state, end='    ', file=f)
+            print(file=f)
+    # gradient
+    with open(args.BatchPath/('cartgrad-' + str(args.NState) + '.data'), 'w') as f:
+        for gradient in gradients:
+            for atom in gradient:
+                print(atom.replace('D', 'e'), end='', file=f)
+
+# Currently, energy only
+def mcscf(args: argparse.Namespace):
     energies = []
     # Read
     for i in range(args.StartDirectory, args.EndDirectory+1):
@@ -155,8 +207,8 @@ if __name__ == "__main__":
         NAtoms=len(f.readlines())
     # Do the job
     if args.mcscf:
-        mcscf(args)
+        mcscf()
     elif args.single or (args.NState == 1):
-        SingleState(args)
+        collect_single()
     else:
-        MultiState(args)
+        collect()
