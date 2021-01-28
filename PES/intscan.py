@@ -1,7 +1,7 @@
 '''
 Generate a scan along 1 or 2 internal direction(s)
 
-If 1 direction, scan along positive direction
+If 1 direction, scan along positive or negative direction
 If 2 directions, mesh along both negative and positive directions
 '''
 
@@ -17,7 +17,8 @@ def parse_args() -> argparse.Namespace: # Command line input
     parser.add_argument('IntCoordDefFile', type=Path, help='internal coordinate definition file')
     parser.add_argument('geom', type=Path, help='Columbus7 geometry file')
     parser.add_argument('direction', type=int, help='internal vector file')
-    parser.add_argument('-n','--NSteps', type=int, default=10, help='number of scan steps (default = 10)')
+    parser.add_argument('-n','--negative', action='store_true', help='scan along negative direction rather than positive')
+    parser.add_argument('-N','--NSteps', type=int, default=10, help='number of scan steps (default = 10)')
     parser.add_argument('-l','--length', type=float, default=0.01, help='step length (default = 0.01)')
     parser.add_argument('-d2','--direction2', type=Path, help='internal vector file for direction 2')
     parser.add_argument('-n2','--NSteps2', type=int, default=10, help='number of scan steps for direction 2 (default = 10)')
@@ -56,7 +57,10 @@ if __name__ == "__main__":
     if args.direction2 is None:
         rsave = r.copy()
         for i in range(1, args.NSteps+1):
-            q1 = q + i * args.length * d
+            if args.negative:
+                q1 = q - i * args.length * d
+            else:
+                q1 = q + i * args.length * d
             FL.CartesianCoordinate(q1, r1, r0=rsave)
             basic.write_geom(args.output, NAtoms, symbol, number, r1, mass)
             rsave[:] = r1[:]
