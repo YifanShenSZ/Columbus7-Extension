@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import List
 import numpy
 
+args          = 0  # Command line input
 listings      = 0  # Output path
 intdim        = 0  # Internal coordinate dimension
 displacements = [] # displacements[i][j] is the displacement along i-th internal coordinate
@@ -25,10 +26,12 @@ def parse_args() -> argparse.Namespace: # Command line input
     parser.add_argument('NState', type=int, help='calculate for state 1 to NState')
     parser.add_argument('-i','--irreducible', type=int, nargs='+', help='number of internal coordinates per irreducible')
     parser.add_argument('-c','--collect', action='store_true', help='additionally collect geometry, MRCI energy, gradient, transition dipole')
+    parser.add_argument('-s','--single', action='store_true',  help='NState-th state only')
     args = parser.parse_args()
     return args
 
-def Hessian(args: argparse.Namespace) -> None: # Calculate finite difference Hessian
+# Calculate finite difference Hessian
+def Hessian() -> None:
     hessian = numpy.empty((args.NState, intdim, intdim))
     for displacement in displacements:
         # Reference point is required
@@ -137,7 +140,8 @@ def read_directory(direcotry: Path) -> (List, List, List, List):
                 dipole[istate][jstate] = temp[2:5]
     return geom, energy, gradient, dipole
 
-def collect(args: argparse.Namespace) -> None: # Collect geometry, MRCI energy, gradient, transition dipole
+# Collect geometry, MRCI energy, gradient, transition dipole
+def collect() -> None:
     geoms     = []
     energies  = []
     gradients = []
@@ -184,6 +188,124 @@ def collect(args: argparse.Namespace) -> None: # Collect geometry, MRCI energy, 
                     for component in dipole[istate][jstate]: print(component, end='    ', file=f)
                     print(file=f)
 
+# Calculate finite difference Hessian for NState-th state only
+def Hessian_single() -> None:
+    hessian = numpy.empty((intdim, intdim))
+    for displacement in displacements:
+        # Reference point is required
+        if len(displacement) == 1:
+            intgrad_ref = numpy.empty(intdim)
+            dir = Path(args.DISPLACEMENT_path/"REFPOINT")
+            with open(dir/'GRADIENTS'/('intgrd.drt1.state' + str(args.NState) + '.sp'), 'r') as f: lines = f.readlines()
+            for i in range(intdim): intgrad_ref[i] = float(lines[i].replace('D', 'e'))
+            break
+    # Read internal coordinate gradients and calculate finite difference
+    intgrad1 = numpy.empty((intdim))
+    intgrad2 = numpy.empty((intdim))
+    for idim in range(intdim):
+        # This assumes gradient to be antisymmetric
+        if len(displacements[idim]) == 1:
+            dir = Path(args.DISPLACEMENT_path/('CALC.c' + str(idim+1) + '.d' + str(displacements[idim][0])))
+            with open(dir/'GRADIENTS'/('intgrd.drt1.state' + str(args.NState) + '.sp'), 'r') as f: lines = f.readlines()
+            for i in range(intdim): intgrad1[i] = float(lines[i].replace('D', 'e'))
+            hessian[idim, :] = (intgrad1 - intgrad_ref) / displacements[idim][0]
+        elif len(displacements[idim]) == 2:
+            dir1 = Path(args.DISPLACEMENT_path/('CALC.c' + str(idim+1) + '.d' + str(displacements[idim][0])))
+            dir2 = Path(args.DISPLACEMENT_path/('CALC.c' + str(idim+1) + '.d' + str(displacements[idim][1])))
+            with open(dir1/'GRADIENTS'/('intgrd.drt1.state' + str(args.NState) + '.sp'), 'r') as f: lines1 = f.readlines()
+            with open(dir2/'GRADIENTS'/('intgrd.drt1.state' + str(args.NState) + '.sp'), 'r') as f: lines2 = f.readlines()
+            for i in range(intdim):
+                intgrad1[i] = float(lines1[i].replace('D', 'e'))
+                intgrad2[i] = float(lines2[i].replace('D', 'e'))
+            hessian[idim, :] = (intgrad1 - intgrad2) / (displacements[idim][0] - displacements[idim][1])
+        else:
+            print("There should be 1 or 2 displacements along internal coordinate", idim, sep=' ')
+    # Symmetrize
+    for i in range(intdim): 
+        for j in range(i+1, intdim):
+            hessian[i, j] = (hessian[i, j] + hessian[j, i]) / 2.0
+            hessian[j, i] =  hessian[i, j]
+    if args.irreducible != None:
+        start = 0
+        for NCoord in args.irreducible:
+            stop = start + NCoord
+            hessian[start:stop, :start] = 0.0
+            hessian[start:stop, stop: ] = 0.0
+            start = stop
+    # Output hessian
+    # Hessian in Columbus 7 format
+    with open(listings/'hessian','w') as f:
+        for i in range(intdim):
+            for j in range(0,intdim,8):
+                jstart=j; jstop=j+8
+                if jstop>intdim: jstop=intdim
+                for jj in range(jstart,jstop):
+                    print('%13.6f' % hessian[i,jj],end='',file=f)
+                print(file=f)
+    # Diagonal elements in intcfl format
+    with open(listings/'hessian_diag','w') as f:
+        for j in range(0,intdim,8):
+            jstart=j; jstop=j+8
+            if jstop>intdim: jstop=intdim
+            for jj in range(jstart,jstop):
+                print('%10.2E'%hessian[jj,jj],end='',file=f)
+            print(file=f)
+
+# Read directory, return (geometry, energy, gradient)
+# The return data are original strings
+def read_directory_single(direcotry: Path) -> (List, str, str):
+    # geometry
+    with open(direcotry/'geom', 'r') as f: geom = f.readlines()
+    # energy
+    with open(direcotry/'LISTINGS'/'ciudgsm.sp','r') as f: lines=f.readlines()
+    for title_line in range(len(lines)):
+        if 'mr-sdci  convergence criteria satisfied' in lines[title_line]: break
+    if title_line == len(lines) - 1 :
+        print('Warning: mr-sdci did not converge at job ' + str(direcotry))
+    else:
+        temp = lines[title_line + 2 + args.NState].split()
+        energy = temp[len(temp) - 5]
+        # gradient
+        with open(direcotry/'GRADIENTS'/('cartgrd.drt1.state' + str(args.NState) + '.sp'), 'r') as f:
+            gradient = f.readlines()
+    return geom, energy, gradient
+
+# Collect geometry, MRCI energy, gradient
+def collect_single() -> None:
+    geoms     = []
+    energies  = []
+    gradients = []
+    # Read REFPOINT
+    geom, energy, gradient = read_directory_single(Path(args.DISPLACEMENT_path/'REFPOINT'))
+    geoms    .append(geom    )
+    energies .append(energy  )
+    gradients.append(gradient)
+    # Read displacement points
+    for idim in range(intdim):
+        for displacement in displacements[idim]:
+            geom, energy, gradient = read_directory_single(
+                Path(args.DISPLACEMENT_path/('CALC.c' + str(idim+1) + '.d' + str(displacement)))
+                )
+            geoms    .append(geom    )
+            energies .append(energy  )
+            gradients.append(gradient)
+    # Output
+    # geometry
+    with open(listings/'geom.data','w') as f:
+        for geom in geoms:
+            for atom in geom:
+                print(atom[:2], atom[10:52], sep='', end='\n', file=f)
+    # energy
+    with open(listings/'energy.data','w') as f:
+        for energy in energies:
+            for state in energy: print(state, end='    ', file=f)
+            print(file=f)
+    # gradient
+    with open(listings/('cartgrad-' + str(args.NState) + '.data'), 'w') as f:
+        for gradient in gradients:
+            for atom in gradient:
+                print(atom.replace('D', 'e'), end='', file=f)
+
 if __name__ == "__main__":
     ''' Initialize '''
     args = parse_args() # Command line input
@@ -203,6 +325,10 @@ if __name__ == "__main__":
             displacements[current_coord].append(float(strs[1]))
     if args.collect: # Get NAtoms
         with open(args.DISPLACEMENT_path/'REFPOINT'/'geom', 'r') as f: NAtoms = len(f.readlines())
-    ''' Do the job ''' 
-    Hessian(args)
-    if args.collect: collect(args)
+    ''' Do the job '''
+    if args.single:
+        Hessian_single()
+        if args.collect: collect_single()
+    else:
+        Hessian()
+        if args.collect: collect()
