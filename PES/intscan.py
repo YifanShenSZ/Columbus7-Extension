@@ -16,7 +16,7 @@ def parse_args() -> argparse.Namespace: # Command line input
     parser.add_argument('IntCoordDefForm', type=str , help='internal coordinate definition format: Columbus7 or default')
     parser.add_argument('IntCoordDefFile', type=Path, help='internal coordinate definition file')
     parser.add_argument('geom', type=Path, help='Columbus7 geometry file')
-    parser.add_argument('direction', type=int, help='internal vector file')
+    parser.add_argument('direction', type=Path, help='internal vector file')
     parser.add_argument('-n','--negative', action='store_true', help='scan along negative direction rather than positive')
     parser.add_argument('-N','--NSteps', type=int, default=10, help='number of scan steps (default = 10)')
     parser.add_argument('-l','--length', type=float, default=0.01, help='step length (default = 0.01)')
