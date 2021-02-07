@@ -240,6 +240,12 @@ if __name__ == "__main__":
     if args.mcscf:
         mcscf()
     elif args.single or (args.NState == 1):
-        collect_single()
+        if args.energy:
+            collect_single_energy()
+        else:
+            collect_single()
     else:
-        collect()
+        if args.energy:
+            collect_energy()
+        else:
+            collect()
