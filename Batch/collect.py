@@ -29,9 +29,9 @@ def parse_args() -> argparse.Namespace: # Command line input
 # Read directory, return (geometry, energy, gradient, dipole)
 # The return data are original strings
 def read_directory(direcotry: Path) -> (List, List, List, List):
-    ## geometry
+    # geometry
     with open(direcotry/'geom', 'r') as f: geom = f.readlines()
-    ## energy
+    # energy
     with open(direcotry/'LISTINGS'/'ciudgsm.sp','r') as f: lines=f.readlines()
     for title_line in range(len(lines)):
         if 'mr-sdci  convergence criteria satisfied' in lines[title_line]: break
@@ -42,7 +42,7 @@ def read_directory(direcotry: Path) -> (List, List, List, List):
         for k in range(args.NState):
             temp = lines[title_line + 2 + k + 1].split()
             energy.append(temp[len(temp) - 5])
-        ## gradient
+        # gradient
         gradient = []
         for i in range(args.NState): gradient.append(0)
         for _ in range(len(gradient)):
@@ -69,67 +69,72 @@ def read_directory(direcotry: Path) -> (List, List, List, List):
                 dipole[istate][jstate] = temp[2:5]
     return geom, energy, gradient, dipole
 
+# Read directory, return energy
+# The return data are original strings
+def read_directory_energy(direcotry: Path) -> List:
+    with open(direcotry/'LISTINGS'/'ciudgsm.sp','r') as f: lines=f.readlines()
+    for title_line in range(len(lines)):
+        if 'mr-sdci  convergence criteria satisfied' in lines[title_line]: break
+    if title_line == len(lines) - 1 :
+        print('Warning: mr-sdci did not converge at job ' + str(direcotry))
+    else:
+        energy = []
+        for k in range(args.NState):
+            temp = lines[title_line + 2 + k + 1].split()
+            energy.append(temp[len(temp) - 5])
+    return energy
+
 # Collect geometry, MRCI energy, gradient, transition dipole
 def collect():
-    # energy only
-    if args.energy:
-        energies = []
-        # Read
-        for i in range(args.StartDirectory, args.EndDirectory + 1):
-            direcotry = args.BatchPath/str(i)
-            with open(direcotry/'LISTINGS'/'ciudgsm.sp','r') as f: lines=f.readlines()
-            for title_line in range(len(lines)):
-                if 'mr-sdci  convergence criteria satisfied' in lines[title_line]: break
-            if title_line == len(lines) - 1 :
-                print('Warning: mr-sdci did not converge at job ' + str(direcotry))
-            else:
-                energy = []
-                for k in range(args.NState):
-                    temp = lines[title_line + 2 + k + 1].split()
-                    energy.append(temp[len(temp) - 5])
-                energies.append(energy)
-        # Output
-        with open(args.BatchPath/'energy.data','w') as f:
-            for energy in energies:
-                for state in energy: print(state, end='    ', file=f)
-                print(file=f)
-    else: 
-        geoms     = []
-        energies  = []
-        gradients = []
-        dipoles   = []
-        # Read
-        for i in range(args.StartDirectory, args.EndDirectory + 1):
-            geom, energy, gradient, dipole = read_directory(args.BatchPath/str(i))
-            geoms    .append(geom    )
-            energies .append(energy  )
-            gradients.append(gradient)
-            dipoles  .append(dipole  )
-        # Output
-        with open(args.BatchPath/'geom.data','w') as f: # geometry
-            for geom in geoms:
-                for atom in geom:
-                    print(atom[:2], atom[10:52], sep='', end='\n', file=f)
-        with open(args.BatchPath/'energy.data','w') as f: # energy
-            for energy in energies:
-                for state in energy: print(state, end='    ', file=f)
-                print(file=f)
-        for istate in range(args.NState): # gradient
-            with open(args.BatchPath/('cartgrad-' + str(istate+1) + '.data'), 'w') as f:
+    geoms     = []
+    energies  = []
+    gradients = []
+    dipoles   = []
+    # Read
+    for i in range(args.StartDirectory, args.EndDirectory + 1):
+        geom, energy, gradient, dipole = read_directory(args.BatchPath/str(i))
+        geoms    .append(geom    )
+        energies .append(energy  )
+        gradients.append(gradient)
+        dipoles  .append(dipole  )
+    # Output
+    with open(args.BatchPath/'geom.data','w') as f: # geometry
+        for geom in geoms:
+            for atom in geom:
+                print(atom[:2], atom[10:52], sep='', end='\n', file=f)
+    with open(args.BatchPath/'energy.data','w') as f: # energy
+        for energy in energies:
+            for state in energy: print(state, end='    ', file=f)
+            print(file=f)
+    for istate in range(args.NState): # gradient
+        with open(args.BatchPath/('cartgrad-' + str(istate+1) + '.data'), 'w') as f:
+            for gradient in gradients:
+                for atom in gradient[istate][istate]:
+                    print(atom.replace('D', 'e'), end='', file=f)
+        for jstate in range(istate + 1, args.NState):
+            with open(args.BatchPath/('cartgrad-' + str(istate+1) + '-' + str(jstate+1) + '.data'), 'w') as f:
                 for gradient in gradients:
-                    for atom in gradient[istate][istate]:
+                    for atom in gradient[istate][jstate]:
                         print(atom.replace('D', 'e'), end='', file=f)
-            for jstate in range(istate + 1, args.NState):
-                with open(args.BatchPath/('cartgrad-' + str(istate+1) + '-' + str(jstate+1) + '.data'), 'w') as f:
-                    for gradient in gradients:
-                        for atom in gradient[istate][jstate]:
-                            print(atom.replace('D', 'e'), end='', file=f)
-        for istate in range(args.NState): # transition dipole
-            for jstate in range(istate+1,args.NState):
-                with open(args.BatchPath/('transdip-'+str(istate+1)+'-'+str(jstate+1)+'.data'),'w') as f:
-                    for dipole in dipoles:
-                        for component in dipole[istate][jstate]: print(component, end='    ', file=f)
-                        print(file=f)
+    for istate in range(args.NState): # transition dipole
+        for jstate in range(istate+1,args.NState):
+            with open(args.BatchPath/('transdip-'+str(istate+1)+'-'+str(jstate+1)+'.data'),'w') as f:
+                for dipole in dipoles:
+                    for component in dipole[istate][jstate]: print(component, end='    ', file=f)
+                    print(file=f)
+
+# Collect MRCI energy
+def collect_energy():
+    energies = []
+    # Read
+    for i in range(args.StartDirectory, args.EndDirectory + 1):
+        energy = read_directory_energy(args.BatchPath/str(i))
+        energies.append(energy  )
+    # Output
+    with open(args.BatchPath/'energy.data','w') as f:
+        for energy in energies:
+            for state in energy: print(state, end='    ', file=f)
+            print(file=f)
 
 # Read directory, return (geometry, energy, gradient)
 # The return data are original strings
@@ -149,6 +154,19 @@ def read_directory_single(direcotry: Path) -> (List, str, str):
         with open(direcotry/'GRADIENTS'/('cartgrd.drt1.state' + str(args.NState) + '.sp'), 'r') as f:
             gradient = f.readlines()
     return geom, energy, gradient
+
+# Read directory, return energy
+# The return data are original strings
+def read_directory_single_energy(direcotry: Path) -> str:
+    with open(direcotry/'LISTINGS'/'ciudgsm.sp','r') as f: lines=f.readlines()
+    for title_line in range(len(lines)):
+        if 'mr-sdci  convergence criteria satisfied' in lines[title_line]: break
+    if title_line == len(lines) - 1 :
+        print('Warning: mr-sdci did not converge at job ' + str(direcotry))
+    else:
+        temp = lines[title_line + 2 + args.NState].split()
+        energy = temp[len(temp) - 5]
+    return energy
 
 # Collect geometry, MRCI energy, gradient
 def collect_single() -> None:
@@ -177,6 +195,19 @@ def collect_single() -> None:
         for gradient in gradients:
             for atom in gradient:
                 print(atom.replace('D', 'e'), end='', file=f)
+
+# Collect MRCI energy
+def collect_single_energy() -> None:
+    energies  = []
+    # Read
+    for i in range(args.StartDirectory, args.EndDirectory + 1):
+        energy = read_directory_single_energy(args.BatchPath/str(i))
+        energies.append(energy  )
+    # Output
+    with open(args.BatchPath/'energy.data','w') as f:
+        for energy in energies:
+            for state in energy: print(state, end='    ', file=f)
+            print(file=f)
 
 # Currently, energy only
 def mcscf(args: argparse.Namespace):
