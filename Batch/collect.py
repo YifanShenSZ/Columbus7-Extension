@@ -187,9 +187,7 @@ def collect_single() -> None:
                 print(atom[:2], atom[10:52], sep='', end='\n', file=f)
     # energy
     with open(args.BatchPath/'energy.data','w') as f:
-        for energy in energies:
-            for state in energy: print(state, end='    ', file=f)
-            print(file=f)
+        for energy in energies: print(energy, file=f)
     # gradient
     with open(args.BatchPath/('cartgrad-' + str(args.NState) + '.data'), 'w') as f:
         for gradient in gradients:
@@ -205,9 +203,7 @@ def collect_single_energy() -> None:
         energies.append(energy  )
     # Output
     with open(args.BatchPath/'energy.data','w') as f:
-        for energy in energies:
-            for state in energy: print(state, end='    ', file=f)
-            print(file=f)
+        for energy in energies: print(energy, file=f)
 
 # Currently, energy only
 def mcscf(args: argparse.Namespace):
