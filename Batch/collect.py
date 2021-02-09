@@ -206,7 +206,7 @@ def collect_single_energy() -> None:
         for energy in energies: print(energy, file=f)
 
 # Currently, energy only
-def mcscf(args: argparse.Namespace):
+def mcscf():
     energies = []
     # Read
     for i in range(args.StartDirectory, args.EndDirectory+1):
