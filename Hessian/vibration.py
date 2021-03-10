@@ -53,6 +53,8 @@ if __name__ == "__main__":
     # Actually, normalize to 9.99 since the visualization file format is %5.2f
     for i in range(intdim): cartmodeT[i,:] *= 9.99 / numpy.amax(numpy.abs(cartmodeT[i,:]))
     FL.Avogadro_Vibration(symbol, r, freq, cartmodeT, file=args.output)
+    with open("frequency.txt", 'w') as f:
+        for i in range(intdim): print(freq[i], file=f)
     if args.intcoord:
         # Wilson GF method normalizes internal coordinate normal mode by Hessian metric
         # However, this is inconvienient to tell the contribution of each internal coordinate
