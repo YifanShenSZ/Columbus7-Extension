@@ -11,7 +11,7 @@ Optionally, additionally collect geometry, MRCI energy, gradient, transition dip
 
 import argparse
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 import numpy
 
 args          = 0  # Command line input
@@ -26,7 +26,7 @@ def parse_args() -> argparse.Namespace: # Command line input
     parser.add_argument('NState', type=int, help='calculate for state 1 to NState')
     parser.add_argument('-i','--irreducible', type=int, nargs='+', help='number of internal coordinates per irreducible')
     parser.add_argument('-c','--collect', action='store_true', help='additionally collect geometry, MRCI energy, gradient, transition dipole')
-    parser.add_argument('-s','--single', action='store_true',  help='NState-th state only')
+    parser.add_argument('-s','--single' , action='store_true', help='NState-th state only')
     args = parser.parse_args()
     return args
 
@@ -99,7 +99,7 @@ def Hessian() -> None:
 
 # Read directory, return (geometry, energy, gradient, dipole)
 # The return data are original strings
-def read_directory(direcotry: Path) -> (List, List, List, List):
+def read_directory(direcotry: Path) -> Tuple[List, List, List, List]:
     ## geometry
     with open(direcotry/'geom', 'r') as f: geom = f.readlines()
     ## energy
@@ -253,7 +253,7 @@ def Hessian_single() -> None:
 
 # Read directory, return (geometry, energy, gradient)
 # The return data are original strings
-def read_directory_single(direcotry: Path) -> (List, str, str):
+def read_directory_single(direcotry: Path) -> Tuple[List, str, str]:
     # geometry
     with open(direcotry/'geom', 'r') as f: geom = f.readlines()
     # energy
