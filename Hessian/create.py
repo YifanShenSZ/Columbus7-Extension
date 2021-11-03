@@ -46,7 +46,7 @@ if __name__ == "__main__":
     assert args.input.exists()
     assert args.IntCoordDef.exists()
     assert args.geom.exists()
-    os.system("~/Software/Mine/Tool-Collection/bin/cart2int.exe -f default -i " + str(args.IntCoordDef) + " -x " + str(args.geom) + " -o intgeom")
+    os.system("~/Software/Mine/Tool-Collection/bin/cart2int.exe -f default -i " + str(args.IntCoordDef) + " -x " + str(args.geom) + " -o intgeom > cart2int.log")
     q_ref = read_vector("intgeom")
     intdim = q_ref.__len__()
     if args.symmetric_modes: symdim = args.symmetric_modes
@@ -78,7 +78,7 @@ if __name__ == "__main__":
                 + "cp " + str(args.IntCoordDef) + " " + str(point) + "; " \
                 + "cp " + str(args.geom) + " " + str(point) + "; " \
                 + "cd " + str(point) + "; " \
-                + "~/Software/Mine/Tool-Collection/bin/int2cart.exe -f default -i " + str(args.IntCoordDef) + " -g intgeom -x " + str(args.geom) + " -o cart.xyz; " \
+                + "~/Software/Mine/Tool-Collection/bin/int2cart.exe -f default -i " + str(args.IntCoordDef) + " -g intgeom -x " + str(args.geom) + " -o cart.xyz > int2cart.log; " \
                 + "$COLUMBUS/xyz2col.x < cart.xyz"
         os.system(command)
         # positive
@@ -91,7 +91,7 @@ if __name__ == "__main__":
                 + "cp " + str(args.IntCoordDef) + " " + str(point) + "; " \
                 + "cp " + str(args.geom) + " " + str(point) + "; " \
                 + "cd " + str(point) + "; " \
-                + "~/Software/Mine/Tool-Collection/bin/int2cart.exe -f default -i " + str(args.IntCoordDef) + " -g intgeom -x " + str(args.geom) + " -o cart.xyz; " \
+                + "~/Software/Mine/Tool-Collection/bin/int2cart.exe -f default -i " + str(args.IntCoordDef) + " -g intgeom -x " + str(args.geom) + " -o cart.xyz > int2cart.log; " \
                 + "$COLUMBUS/xyz2col.x < cart.xyz"
         os.system(command)
     for i in range(symdim, intdim):
@@ -106,7 +106,7 @@ if __name__ == "__main__":
                 + "cp " + str(args.IntCoordDef) + " " + str(point) + "; " \
                 + "cp " + str(args.geom) + " " + str(point) + "; " \
                 + "cd " + str(point) + "; " \
-                + "~/Software/Mine/Tool-Collection/bin/int2cart.exe -f default -i " + str(args.IntCoordDef) + " -g intgeom -x " + str(args.geom) + " -o cart.xyz; " \
+                + "~/Software/Mine/Tool-Collection/bin/int2cart.exe -f default -i " + str(args.IntCoordDef) + " -g intgeom -x " + str(args.geom) + " -o cart.xyz > int2cart.log; " \
                 + "$COLUMBUS/xyz2col.x < cart.xyz"
         os.system(command)
     displfl.close()
