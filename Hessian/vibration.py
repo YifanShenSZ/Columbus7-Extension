@@ -1,5 +1,5 @@
 '''
-Analyze vibration based on the internal coordinate Hessian
+Analyze vibration based on the internal coordinate Hessian in Columbus7 format
 Return a file with geometry + frequencies + normal modes visualizable in Avogadro
 '''
 
@@ -11,7 +11,7 @@ import basic
 
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument('IntCoordDefForm', type=str, help='internal coordinate definition format: Columbus7 or default')
+    parser.add_argument('format', type=str, help='internal coordinate definition format: Columbus7 or default')
     parser.add_argument('IntCoordDef', type=Path, help='internal coordinate definition file')
     parser.add_argument('geom',    type=Path, help='Columbus7 geometry file')
     parser.add_argument('hessian', type=Path, help='Columbus7 hessian file')
@@ -26,8 +26,8 @@ if __name__ == "__main__":
     # Command line input
     args = parse_args()
     # Define internal coordinate
-    intdim, intcoorddef = FL.FetchInternalCoordinateDefinition(args.IntCoordDefForm, file=args.IntCoordDef)
-    FL.DefineInternalCoordinate(args.IntCoordDefForm, file=args.IntCoordDef)
+    intdim, intcoorddef = FL.FetchInternalCoordinateDefinition(args.format, file=args.IntCoordDef)
+    FL.DefineInternalCoordinate(args.format, file=args.IntCoordDef)
     # Read geometry
     NAtoms, symbol, number, r, mass = basic.read_geom(args.geom)
     # Read Hessian

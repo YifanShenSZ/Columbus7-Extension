@@ -1,4 +1,7 @@
 '''
+A replacement to buggy Columbus7 built-in forceconst.pl
+Output Hessian in Columbus7 format
+
 Calculate Columbus7 MRCI energy internal coordinate Hessian
 Output to DISPLACEMENT/../LISTINGS
 This is a finite difference calculation from gradients,
@@ -18,7 +21,6 @@ args          = 0  # Command line input
 listings      = 0  # Output path
 intdim        = 0  # Internal coordinate dimension
 displacements = [] # displacements[i][j] is the displacement along i-th internal coordinate
-NAtoms        = 0  # Number of atoms
 
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
@@ -323,8 +325,6 @@ if __name__ == "__main__":
                 current_coord = coord
                 displacements.append([])
             displacements[current_coord].append(float(strs[1]))
-    if args.collect: # Get NAtoms
-        with open(args.DISPLACEMENT_path/'REFPOINT'/'geom', 'r') as f: NAtoms = len(f.readlines())
     ''' Do the job '''
     if args.single:
         Hessian_single()

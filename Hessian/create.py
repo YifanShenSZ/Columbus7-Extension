@@ -16,9 +16,9 @@ from numpy.lib.function_base import disp
 def parse_args() -> argparse.Namespace: # Command line input
     parser = argparse.ArgumentParser(__doc__)
     # required arguments
-    parser.add_argument("input", type=Path, help="input template directory")
-    parser.add_argument("IntCoordDef", type=Path, help="internal coordinate definition file in default format")
-    parser.add_argument("geom", type=Path, help="reference xyz geometry")
+    parser.add_argument("input", type=str, help="input template directory")
+    parser.add_argument("IntCoordDef", type=str, help="internal coordinate definition file in default format")
+    parser.add_argument("geom", type=str, help="reference xyz geometry")
     # optional arguments
     parser.add_argument("-d","--displacement", type=float, default=0.01, help="finite difference displacement (default = 0.01 a.u.)")
     parser.add_argument("-r","--rally_point", type=Path, default=Path("DISPLACEMENT"), help="location to gather the single points (default = DISPLACEMENT)")
@@ -43,10 +43,10 @@ def write_vector(v:List, file:Path) -> None:
 if __name__ == "__main__":
     ''' initialize '''
     args = parse_args()
-    assert args.input.exists()
-    assert args.IntCoordDef.exists()
-    assert args.geom.exists()
-    os.system("~/Software/Mine/Tool-Collection/bin/cart2int.exe -f default -i " + str(args.IntCoordDef) + " -x " + str(args.geom) + " -o intgeom > cart2int.log")
+    assert Path(args.input).exists()
+    assert Path(args.IntCoordDef).exists()
+    assert Path(args.geom).exists()
+    os.system("~/Software/Mine/Tool-Collection/bin/cart2int.exe -f default -i " + args.IntCoordDef + " -x " + args.geom + " -o intgeom > cart2int.log")
     q_ref = read_vector("intgeom")
     intdim = q_ref.__len__()
     if args.symmetric_modes: symdim = args.symmetric_modes
@@ -59,11 +59,12 @@ if __name__ == "__main__":
     ''' reference point '''
     point = args.rally_point / "REFPOINT"
     if not point.exists(): point.mkdir()
-    command = "cp " + str(args.input) + "/* " + str(point) + "; " \
-            + "cp " + str(args.IntCoordDef) + " " + str(point) + "; " \
-            + "cp " + str(args.geom) + " " + str(point) + "; " \
-            + "cd " + str(point) + "; " \
-            + "$COLUMBUS/xyz2col.x < " + str(args.geom)
+    point = str(point)
+    command = "cp " + args.input + "/* " + point + "; " \
+            + "cp " + args.IntCoordDef + " " + point + "; " \
+            + "cp " + args.geom + " " + point + "; " \
+            + "cd " + point + "; " \
+            + "$COLUMBUS/xyz2col.x < " + args.geom
     os.system(command)
     ''' finite difference single points '''
     for i in range(symdim):
@@ -74,11 +75,12 @@ if __name__ == "__main__":
         point = args.rally_point / ("CALC.c" + str(i + 1) + ".d" + str(-args.displacement))
         if not point.exists(): point.mkdir()
         write_vector(q, point / "intgeom")
-        command = "cp " + str(args.input) + "/* " + str(point) + "; " \
-                + "cp " + str(args.IntCoordDef) + " " + str(point) + "; " \
-                + "cp " + str(args.geom) + " " + str(point) + "; " \
-                + "cd " + str(point) + "; " \
-                + "~/Software/Mine/Tool-Collection/bin/int2cart.exe -f default -i " + str(args.IntCoordDef) + " -g intgeom -x " + str(args.geom) + " -o cart.xyz > int2cart.log; " \
+        point = str(point)
+        command = "cp " + args.input + "/* " + point + "; " \
+                + "cp " + args.IntCoordDef + " " + point + "; " \
+                + "cp " + args.geom + " " + point + "; " \
+                + "cd " + point + "; " \
+                + "~/Software/Mine/Tool-Collection/bin/int2cart.exe -f default -i " + args.IntCoordDef + " -g intgeom -x " + args.geom + " -o cart.xyz > int2cart.log; " \
                 + "$COLUMBUS/xyz2col.x < cart.xyz"
         os.system(command)
         # positive
@@ -87,11 +89,12 @@ if __name__ == "__main__":
         point = args.rally_point / ("CALC.c" + str(i + 1) + ".d" + str(args.displacement))
         if not point.exists(): point.mkdir()
         write_vector(q, point / "intgeom")
-        command = "cp " + str(args.input) + "/* " + str(point) + "; " \
-                + "cp " + str(args.IntCoordDef) + " " + str(point) + "; " \
-                + "cp " + str(args.geom) + " " + str(point) + "; " \
-                + "cd " + str(point) + "; " \
-                + "~/Software/Mine/Tool-Collection/bin/int2cart.exe -f default -i " + str(args.IntCoordDef) + " -g intgeom -x " + str(args.geom) + " -o cart.xyz > int2cart.log; " \
+        point = str(point)
+        command = "cp " + args.input + "/* " + point + "; " \
+                + "cp " + args.IntCoordDef + " " + point + "; " \
+                + "cp " + args.geom + " " + point + "; " \
+                + "cd " + point + "; " \
+                + "~/Software/Mine/Tool-Collection/bin/int2cart.exe -f default -i " + args.IntCoordDef + " -g intgeom -x " + args.geom + " -o cart.xyz > int2cart.log; " \
                 + "$COLUMBUS/xyz2col.x < cart.xyz"
         os.system(command)
     for i in range(symdim, intdim):
@@ -102,11 +105,12 @@ if __name__ == "__main__":
         point = args.rally_point / ("CALC.c" + str(i + 1) + ".d" + str(-args.displacement))
         if not point.exists(): point.mkdir()
         write_vector(q, point / "intgeom")
-        command = "cp " + str(args.input) + "/* " + str(point) + "; " \
-                + "cp " + str(args.IntCoordDef) + " " + str(point) + "; " \
-                + "cp " + str(args.geom) + " " + str(point) + "; " \
-                + "cd " + str(point) + "; " \
-                + "~/Software/Mine/Tool-Collection/bin/int2cart.exe -f default -i " + str(args.IntCoordDef) + " -g intgeom -x " + str(args.geom) + " -o cart.xyz > int2cart.log; " \
+        point = str(point)
+        command = "cp " + args.input + "/* " + point + "; " \
+                + "cp " + args.IntCoordDef + " " + point + "; " \
+                + "cp " + args.geom + " " + point + "; " \
+                + "cd " + point + "; " \
+                + "~/Software/Mine/Tool-Collection/bin/int2cart.exe -f default -i " + args.IntCoordDef + " -g intgeom -x " + args.geom + " -o cart.xyz > int2cart.log; " \
                 + "$COLUMBUS/xyz2col.x < cart.xyz"
         os.system(command)
     displfl.close()
