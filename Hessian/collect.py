@@ -33,6 +33,7 @@ def parse_args() -> argparse.Namespace: # Command line input
     args = parser.parse_args()
     return args
 
+# read Columbus7 Cartesian gradient, return internal gradient
 def cart2int(dir:Path, state:int) -> numpy.ndarray:
     # preprocess Columbus7 Cartesian gradient: nowadays floating point numbers use 'e' instead of 'D'
     cartgrad = dir/"GRADIENTS"/("cartgrd.drt1.state" + str(state+1) + ".sp")
@@ -41,7 +42,7 @@ def cart2int(dir:Path, state:int) -> numpy.ndarray:
     with open(cartgrad, 'w') as f:
         for line in lines:
             print(line.replace('D', 'e'), end='', file=f)
-    # cart2int
+    # call cart2int.exe
     command = "cd " + str(dir) + "; "
     command += "~/Software/Mine/Tool-Collection/bin/cart2int.exe -f default " \
              + "-i " + args.IntCoordDef + " " \
@@ -67,14 +68,15 @@ def Hessian() -> None:
             for istate in range(args.NState):
                 intgrad_ref[istate, :] = cart2int(dir, istate)
             break
-    # Read internal coordinate gradients and calculate finite difference
+    # read internal coordinate gradients and calculate finite difference
     for idim in range(intdim):
-        # This assumes gradient to be antisymmetric
+        # this assumes gradient to be antisymmetric
         if len(displacements[idim]) == 1:
             dir = Path(args.DISPLACEMENT_path/('CALC.c' + str(idim+1) + '.d' + str(displacements[idim][0])))
             for istate in range(args.NState):
                 intgrad = cart2int(dir, istate)
                 hessian[istate, idim, :] = (intgrad - intgrad_ref[istate, :]) / displacements[idim][0]
+        # normal finite difference
         elif len(displacements[idim]) == 2:
             dir1 = Path(args.DISPLACEMENT_path/('CALC.c' + str(idim+1) + '.d' + str(displacements[idim][0])))
             dir2 = Path(args.DISPLACEMENT_path/('CALC.c' + str(idim+1) + '.d' + str(displacements[idim][1])))
@@ -84,7 +86,7 @@ def Hessian() -> None:
                 hessian[istate, idim, :] = (intgrad1 - intgrad2) / (displacements[idim][0] - displacements[idim][1])
         else:
             print("There should be 1 or 2 displacements along internal coordinate", idim, sep=' ')
-    # Symmetrize
+    # symmetrize
     for i in range(intdim): 
         for j in range(i+1, intdim):
             hessian[:, i, j] = (hessian[:, i, j] + hessian[:, j, i]) / 2.0
@@ -96,7 +98,7 @@ def Hessian() -> None:
             hessian[:, start:stop, :start] = 0.0
             hessian[:, start:stop, stop: ] = 0.0
             start = stop
-    # Output hessian
+    # output
     for istate in range(args.NState):
         with open(listings/('hessian'+str(istate+1)),'w') as f:
             for i in range(intdim):
