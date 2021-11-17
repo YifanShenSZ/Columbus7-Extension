@@ -53,7 +53,7 @@ def Hessian() -> None:
                 command += "~/Software/Mine/Tool-Collection/bin/cart2int.exe -f default " \
                          + "-i " + args.IntCoordDef + " " \
                          + "-x " + args.geom + " " \
-                         + "-g grad.cart; "
+                         + "-g grad.cart > cart2int.log; "
                 command += "cd ../.."
                 os.system(command)
                 with open(dir/"grad.int", 'r') as f: lines = f.readlines()
@@ -77,7 +77,7 @@ def Hessian() -> None:
                 command += "~/Software/Mine/Tool-Collection/bin/cart2int.exe -f default " \
                          + "-i " + args.IntCoordDef + " " \
                          + "-x cart.xyz " \
-                         + "-g grad.cart; "
+                         + "-g grad.cart > cart2int.log; "
                 command += "cd ../.."
                 os.system(command)
                 with open(dir/"grad.int", 'r') as f: lines = f.readlines()
@@ -98,7 +98,7 @@ def Hessian() -> None:
                 command += "~/Software/Mine/Tool-Collection/bin/cart2int.exe -f default " \
                          + "-i " + args.IntCoordDef + " " \
                          + "-x cart.xyz " \
-                         + "-g grad.cart; "
+                         + "-g grad.cart > cart2int.log; "
                 command += "cd ../.."
                 os.system(command)
                 with open(dir1/"grad.int", 'r') as f: lines = f.readlines()
@@ -114,7 +114,7 @@ def Hessian() -> None:
                 command += "~/Software/Mine/Tool-Collection/bin/cart2int.exe -f default " \
                          + "-i " + args.IntCoordDef + " " \
                          + "-x cart.xyz " \
-                         + "-g grad.cart; "
+                         + "-g grad.cart > cart2int.log; "
                 command += "cd ../.."
                 os.system(command)
                 with open(dir2/"grad.int", 'r') as f: lines = f.readlines()
