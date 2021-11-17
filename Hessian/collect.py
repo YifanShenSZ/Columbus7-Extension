@@ -33,7 +33,29 @@ def parse_args() -> argparse.Namespace: # Command line input
     args = parser.parse_args()
     return args
 
-# Calculate finite difference Hessian
+def cart2int(dir:Path, state:int) -> numpy.ndarray:
+    # preprocess Columbus7 Cartesian gradient: nowadays floating point numbers use 'e' instead of 'D'
+    cartgrad = dir/"GRADIENTS"/("cartgrd.drt1.state" + str(state+1) + ".sp")
+    with open(cartgrad, 'r') as f: lines = f.readlines()
+    cartgrad = dir/"grad.cart"
+    with open(cartgrad, 'w') as f:
+        for line in lines:
+            print(line.replace('D', 'e'), end='', file=f)
+    # cart2int
+    command = "cd " + str(dir) + "; "
+    command += "~/Software/Mine/Tool-Collection/bin/cart2int.exe -f default " \
+             + "-i " + args.IntCoordDef + " " \
+             + "-x " + args.geom + " " \
+             + "-g grad.cart > cart2int.log; "
+    command += "cd ../.."
+    os.system(command)
+    # read internal gradient
+    intgrad = numpy.empty(intdim)
+    with open(dir/"grad.int", 'r') as f: lines = f.readlines()
+    for i in range(intdim): intgrad[i] = float(lines[i])
+    return intgrad
+
+# calculate finite difference Hessian
 def Hessian() -> None:
     hessian = numpy.empty((args.NState, intdim, intdim))
     # if some coordinate has only 1 displacement,
@@ -43,83 +65,22 @@ def Hessian() -> None:
             intgrad_ref = numpy.empty((args.NState, intdim))
             dir = Path(args.DISPLACEMENT_path/"REFPOINT")
             for istate in range(args.NState):
-                cartgrad = dir/"GRADIENTS"/("cartgrd.drt1.state" + str(istate+1) + ".sp")
-                with open(cartgrad, 'r') as f: lines = f.readlines()
-                cartgrad = dir/"grad.cart"
-                with open(cartgrad, 'w') as f:
-                    for line in lines:
-                        print(line.replace('D', 'e'), end='', file=f)
-                command = "cd " + str(dir) + "; "
-                command += "~/Software/Mine/Tool-Collection/bin/cart2int.exe -f default " \
-                         + "-i " + args.IntCoordDef + " " \
-                         + "-x " + args.geom + " " \
-                         + "-g grad.cart > cart2int.log; "
-                command += "cd ../.."
-                os.system(command)
-                with open(dir/"grad.int", 'r') as f: lines = f.readlines()
-                for i in range(intdim): intgrad_ref[istate, i] = float(lines[i])
+                intgrad_ref[istate, :] = cart2int(dir, istate)
             break
     # Read internal coordinate gradients and calculate finite difference
-    intgrad1 = numpy.empty((intdim))
-    intgrad2 = numpy.empty((intdim))
     for idim in range(intdim):
         # This assumes gradient to be antisymmetric
         if len(displacements[idim]) == 1:
             dir = Path(args.DISPLACEMENT_path/('CALC.c' + str(idim+1) + '.d' + str(displacements[idim][0])))
             for istate in range(args.NState):
-                cartgrad = dir/"GRADIENTS"/("cartgrd.drt1.state" + str(istate+1) + ".sp")
-                with open(cartgrad, 'r') as f: lines = f.readlines()
-                cartgrad = dir/"grad.cart"
-                with open(cartgrad, 'w') as f:
-                    for line in lines:
-                        print(line.replace('D', 'e'), end='', file=f)
-                command = "cd " + str(dir) + "; "
-                command += "~/Software/Mine/Tool-Collection/bin/cart2int.exe -f default " \
-                         + "-i " + args.IntCoordDef + " " \
-                         + "-x cart.xyz " \
-                         + "-g grad.cart > cart2int.log; "
-                command += "cd ../.."
-                os.system(command)
-                with open(dir/"grad.int", 'r') as f: lines = f.readlines()
-                for i in range(intdim): intgrad1[i] = float(lines[i].replace('D', 'e'))
-                hessian[istate, idim, :] = (intgrad1 - intgrad_ref[istate, :]) / displacements[idim][0]
+                intgrad = cart2int(dir, istate)
+                hessian[istate, idim, :] = (intgrad - intgrad_ref[istate, :]) / displacements[idim][0]
         elif len(displacements[idim]) == 2:
             dir1 = Path(args.DISPLACEMENT_path/('CALC.c' + str(idim+1) + '.d' + str(displacements[idim][0])))
             dir2 = Path(args.DISPLACEMENT_path/('CALC.c' + str(idim+1) + '.d' + str(displacements[idim][1])))
             for istate in range(args.NState):
-                # read gradient 1
-                cartgrad = dir1/"GRADIENTS"/("cartgrd.drt1.state" + str(istate+1) + ".sp")
-                with open(cartgrad, 'r') as f: lines = f.readlines()
-                cartgrad = dir1/"grad.cart"
-                with open(cartgrad, 'w') as f:
-                    for line in lines:
-                        print(line.replace('D', 'e'), end='', file=f)
-                command = "cd " + str(dir1) + "; "
-                command += "~/Software/Mine/Tool-Collection/bin/cart2int.exe -f default " \
-                         + "-i " + args.IntCoordDef + " " \
-                         + "-x cart.xyz " \
-                         + "-g grad.cart > cart2int.log; "
-                command += "cd ../.."
-                os.system(command)
-                with open(dir1/"grad.int", 'r') as f: lines = f.readlines()
-                for i in range(intdim): intgrad1[i] = float(lines[i].replace('D', 'e'))
-                # read gradient 2
-                cartgrad = dir2/"GRADIENTS"/("cartgrd.drt1.state" + str(istate+1) + ".sp")
-                with open(cartgrad, 'r') as f: lines = f.readlines()
-                cartgrad = dir2/"grad.cart"
-                with open(cartgrad, 'w') as f:
-                    for line in lines:
-                        print(line.replace('D', 'e'), end='', file=f)
-                command = "cd " + str(dir2) + "; "
-                command += "~/Software/Mine/Tool-Collection/bin/cart2int.exe -f default " \
-                         + "-i " + args.IntCoordDef + " " \
-                         + "-x cart.xyz " \
-                         + "-g grad.cart > cart2int.log; "
-                command += "cd ../.."
-                os.system(command)
-                with open(dir2/"grad.int", 'r') as f: lines = f.readlines()
-                for i in range(intdim): intgrad2[i] = float(lines[i].replace('D', 'e'))
-                # finite difference
+                intgrad1 = cart2int(dir1, istate)
+                intgrad2 = cart2int(dir2, istate)
                 hessian[istate, idim, :] = (intgrad1 - intgrad2) / (displacements[idim][0] - displacements[idim][1])
         else:
             print("There should be 1 or 2 displacements along internal coordinate", idim, sep=' ')
@@ -143,8 +104,8 @@ def Hessian() -> None:
                     print('%25.10f' % hessian[istate,i,j],end='',file=f)
                 print(file=f)
 
-# Read directory, return (geometry, energy, gradient, dipole)
-# The return data are original strings
+# read directory, return (geometry, energy, gradient, dipole)
+# the return data are original strings
 def read_directory(direcotry: Path) -> Tuple[List, List, List, List]:
     ## geometry
     with open(direcotry/'geom', 'r') as f: geom = f.readlines()
@@ -186,7 +147,7 @@ def read_directory(direcotry: Path) -> Tuple[List, List, List, List]:
                 dipole[istate][jstate] = temp[2:5]
     return geom, energy, gradient, dipole
 
-# Collect geometry, MRCI energy, gradient, transition dipole
+# collect geometry, MRCI energy, gradient, transition dipole
 def collect() -> None:
     geoms     = []
     energies  = []
