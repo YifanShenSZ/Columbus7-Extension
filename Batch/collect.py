@@ -7,7 +7,7 @@ Alternative modes are available, see optional arguments
 
 import argparse
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 import numpy
 
 args   = 0  # Command line input
@@ -28,7 +28,7 @@ def parse_args() -> argparse.Namespace: # Command line input
 
 # Read directory, return (geometry, energy, gradient, dipole)
 # The return data are original strings
-def read_directory(direcotry: Path) -> (List, List, List, List):
+def read_directory(direcotry: Path) -> Tuple[List]:
     # geometry
     with open(direcotry/'geom', 'r') as f: geom = f.readlines()
     # energy
@@ -69,9 +69,12 @@ def read_directory(direcotry: Path) -> (List, List, List, List):
                 dipole[istate][jstate] = temp[2:5]
     return geom, energy, gradient, dipole
 
-# Read directory, return energy
+# Read directory, return (geometry, energy)
 # The return data are original strings
-def read_directory_energy(direcotry: Path) -> List:
+def read_directory_energy(direcotry: Path) -> Tuple[List]:
+    # geometry
+    with open(direcotry/'geom', 'r') as f: geom = f.readlines()
+    # energy
     with open(direcotry/'LISTINGS'/'ciudgsm.sp','r') as f: lines=f.readlines()
     for title_line in range(len(lines)):
         if 'mr-sdci  convergence criteria satisfied' in lines[title_line]: break
@@ -82,7 +85,7 @@ def read_directory_energy(direcotry: Path) -> List:
         for k in range(args.NState):
             temp = lines[title_line + 2 + k + 1].split()
             energy.append(temp[len(temp) - 5])
-    return energy
+    return geom, energy
 
 # Collect geometry, MRCI energy, gradient, transition dipole
 def collect():
@@ -125,12 +128,18 @@ def collect():
 
 # Collect MRCI energy
 def collect_energy():
+    geoms     = []
     energies = []
     # Read
     for i in range(args.StartDirectory, args.EndDirectory + 1):
-        energy = read_directory_energy(args.BatchPath/str(i))
-        energies.append(energy  )
+        geom, energy = read_directory_energy(args.BatchPath/str(i))
+        geoms   .append(geom  )
+        energies.append(energy)
     # Output
+    with open(args.BatchPath/'geom.data','w') as f:
+        for geom in geoms:
+            for atom in geom:
+                print(atom[:2], atom[10:52], sep='', end='\n', file=f)
     with open(args.BatchPath/'energy.data','w') as f:
         for energy in energies:
             for state in energy: print(state, end='    ', file=f)
@@ -138,7 +147,7 @@ def collect_energy():
 
 # Read directory, return (geometry, energy, gradient)
 # The return data are original strings
-def read_directory_single(direcotry: Path) -> (List, str, str):
+def read_directory_single(direcotry: Path) -> Tuple[List, str, str]:
     # geometry
     with open(direcotry/'geom', 'r') as f: geom = f.readlines()
     # energy
