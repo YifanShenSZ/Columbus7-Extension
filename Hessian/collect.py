@@ -6,7 +6,7 @@ This is a finite difference calculation from gradients,
 the Hessian matrix elements will be symmetrized by Hij = (Hij + Hji) / 2
 futher symmetrization will be performed given irreducible
 
-Optionally, additionally collect geometry, MRCI energy, gradient, transition dipole
+Optionally, collect geometry, MRCI energy, gradient, transition dipole instead of Hessian
 
 Output to DISPLACEMENT/../LISTINGS
 '''
@@ -29,7 +29,7 @@ def parse_args() -> argparse.Namespace: # Command line input
     parser.add_argument("IntCoordDef", type=str, help="internal coordinate definition file in default format")
     parser.add_argument("geom", type=str, help="reference xyz geometry")
     parser.add_argument("-i","--irreducible", type=int, nargs='+', help="number of internal coordinates per irreducible")
-    parser.add_argument("-c","--collect", action='store_true', help="additionally collect geometry, MRCI energy, gradient, transition dipole")
+    parser.add_argument("-c","--collect", action='store_true', help="collect geometry, MRCI energy, gradient, transition dipole instead of Hessian")
     args = parser.parse_args()
     return args
 
@@ -217,5 +217,7 @@ if __name__ == "__main__":
                 displacements.append([])
             displacements[current_coord].append(float(strs[1]))
     ''' Do the job '''
-    Hessian()
-    if args.collect: collect()
+    if args.collect:
+        collect()
+    else:
+        Hessian()
