@@ -17,7 +17,7 @@ Solutions to some issues
 ## Basis set
 Linear dependency will not be excluded automatically, so user has to take care of that
 
-To define customized basis beyond `colinp`, user has to manually modify `daltaoin` and `infofl`
+To define customized basis beyond `colinp`, user has to manually modify `daltaoin`, then `infofl` who contains the number of basis in each irreducible representation
 
 `daltaoin` specifies the GTOs and the contractions, whose format is:
 1. (s for spherical basis, c for Cartesian basis), type of atoms, unknown flag, unknown flag
@@ -25,8 +25,6 @@ To define customized basis beyond `colinp`, user has to manually modify `daltaoi
 3. Atom coordinate
 4. H marking the head of a basis, number of alphas, number of contracted basis. Basis are sorted by l
 5. Alpha value, contraction coefficients
-
-`infofl` contains the number of basis in each irreducible representation
 
 ## MCSCF
 MCSCF is a nonlinear optimization problem, so may easily be trapped into local minimum, e.g.:
